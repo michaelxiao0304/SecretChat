@@ -20,3 +20,13 @@ export async function submitForm(endpoint, fields, http = fetch) {
     body:new URLSearchParams(fields)
   }, http);
 }
+
+export async function change(endpoint, method, data) {
+  const csrf = await request('session');
+  const options = {method, headers:{[csrf.header]:csrf.token}};
+  if (data !== undefined) {
+    options.headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(data);
+  }
+  return request(endpoint, options);
+}
