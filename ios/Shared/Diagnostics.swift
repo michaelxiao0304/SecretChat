@@ -19,12 +19,14 @@ struct DiagnosticRecord {
     let phase: DiagnosticPhase
     let trace: String
     let reason: DiagnosticReason?
+    let requestID: UUID?
     let code: Int?
     let count: Int?
     let elapsedMS: UInt64?
 
     var line: String {
         var fields = ["trace=" + trace, "stage=" + stage.description, "phase=" + phase.rawValue]
+        if let requestID { fields.append("requestId=" + requestID.wire) }
         if let reason { fields.append("reason=" + reason.rawValue) }
         if let code { fields.append("code=" + String(code)) }
         if let count { fields.append("count=" + String(count)) }
@@ -39,10 +41,10 @@ enum Diagnostics {
     @TaskLocal static var observer: ((DiagnosticRecord) -> Void)?
 
     static func event(_ area: DiagnosticArea, _ stage: StaticString, _ phase: DiagnosticPhase,
-                      reason: DiagnosticReason? = nil, code: Int? = nil, count: Int? = nil,
+                      reason: DiagnosticReason? = nil, code: Int? = nil, requestID: UUID? = nil, count: Int? = nil,
                       elapsedMS: UInt64? = nil) {
         let record = DiagnosticRecord(area: area, stage: stage, phase: phase, trace: (traceID ?? UUID()).wire,
-                                     reason: reason, code: code, count: count, elapsedMS: elapsedMS)
+                                     reason: reason, requestID: requestID, code: code, count: count, elapsedMS: elapsedMS)
         if let observer { observer(record); return }
         let logger = Logger(subsystem: subsystem, category: area.rawValue)
         switch phase {
@@ -70,7 +72,8 @@ enum Diagnostics {
         case is ClientError: reason = .invalidData
         default: reason = .unknown
         }
-        event(area, stage, reason == .cancelled ? .skip : phase, reason: reason, code: code, elapsedMS: elapsedMS)
+        event(area, stage, reason == .cancelled ? .skip : phase, reason: reason, code: code,
+              requestID: (error as? Service.Failure)?.requestID, elapsedMS: elapsedMS)
     }
 
     static func span<T>(_ area: DiagnosticArea, _ stage: StaticString,

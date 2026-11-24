@@ -31,10 +31,14 @@ struct MailPage: Decodable {
 struct Service {
     struct Failure: LocalizedError {
         let status: Int
-        var errorDescription: String? { "服务请求失败（HTTP \(status)）。" }
+        let requestID: UUID?
+        var errorDescription: String? {
+            let message = "服务请求失败（HTTP \(status)）。"
+            return requestID.map { message + " 请求编号 " + $0.wire } ?? message
+        }
     }
 
-    typealias Exchange = (URLRequest) async throws -> (Int, Data)
+    typealias Exchange = (URLRequest) async throws -> (Data, URLResponse)
     private static let session: URLSession = {
         let config = URLSessionConfiguration.ephemeral
         config.httpShouldSetCookies = false
@@ -54,9 +58,7 @@ struct Service {
         self.base = url
         self.token = token
         self.exchange = exchange ?? { request in
-            let (data, response) = try await Self.session.data(for: request)
-            guard let http = response as? HTTPURLResponse else { throw ClientError.invalidEnvelope }
-            return (http.statusCode, data)
+            try await Self.session.data(for: request)
         }
     }
 
@@ -77,9 +79,11 @@ struct Service {
     private func data(_ path: String, method: String = "GET", query: [URLQueryItem] = [], body: Data? = nil,
                       status: Int = 200, operation: StaticString = #function) async throws -> Data {
         try await Diagnostics.span(.network, operation) {
-            let (received, data) = try await exchange(makeRequest(path, method: method, query: query, body: body))
-            guard received == status else { throw Failure(status: received) }
-            Diagnostics.event(.network, "http.response", .ok, code: received)
+            let (data, response) = try await exchange(makeRequest(path, method: method, query: query, body: body))
+            guard let http = response as? HTTPURLResponse else { throw ClientError.invalidEnvelope }
+            let requestID = http.value(forHTTPHeaderField: "X-Request-ID").flatMap(UUID.init(uuidString:))
+            guard http.statusCode == status else { throw Failure(status: http.statusCode, requestID: requestID) }
+            Diagnostics.event(.network, "http.response", .ok, code: http.statusCode, requestID: requestID)
             return data
         }
     }

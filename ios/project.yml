@@ -11,7 +11,6 @@ packages:
 settings:
   base:
     SWIFT_VERSION: 5.0
-    TARGETED_DEVICE_FAMILY: 1
     CURRENT_PROJECT_VERSION: 1
     MARKETING_VERSION: 0.1
     GENERATE_INFOPLIST_FILE: YES
@@ -20,6 +19,9 @@ settings:
 targetTemplates:
   Client:
     platform: iOS
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "1"
     dependencies:
       - package: LibSignal
         product: LibSignalClient
@@ -59,6 +61,7 @@ targets:
       - target: SecretChat
     settings:
       base:
+        TARGETED_DEVICE_FAMILY: "1"
         PRODUCT_BUNDLE_IDENTIFIER: chat.secretchat.prototype.tests
 schemes:
   SecretChat:

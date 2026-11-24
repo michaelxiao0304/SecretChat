@@ -26,24 +26,24 @@ final class DeviceFlowTests: XCTestCase {
                     XCTAssertEqual(body["code"], "123456")
                     XCTAssertNotNil(body["challengeId"])
                     XCTAssertNil(body["email"])
-                    return (201, try JSONSerialization.data(withJSONObject: ["accountId":local.wire,"deviceId":myDevice.wire,"token":"session"]))
+                    return try httpReply(201, try JSONSerialization.data(withJSONObject: ["accountId":local.wire,"deviceId":myDevice.wire,"token":"session"]))
                 case ("GET", "/secretchat/api/keys/one-time"):
-                    return (200, try JSONSerialization.data(withJSONObject: ["remaining":uploaded]))
+                    return try httpReply(200, try JSONSerialization.data(withJSONObject: ["remaining":uploaded]))
                 case ("POST", "/secretchat/api/keys/one-time"):
                     let batch = try JSONDecoder().decode([String:[OneTimePrekey]].self, from: XCTUnwrap(request.httpBody))
                     XCTAssertEqual(try vault.load()?.crypto.pendingPrekeys, batch["keys"])
                     uploaded = batch["keys"]?.count ?? 0
-                    return (200, try JSONSerialization.data(withJSONObject: ["remaining":uploaded]))
+                    return try httpReply(200, try JSONSerialization.data(withJSONObject: ["remaining":uploaded]))
                 case ("GET", "/secretchat/api/contacts"):
                     XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer session")
-                    return (200, try JSONEncoder().encode([contact]))
+                    return try httpReply(200, try JSONEncoder().encode([contact]))
                 case ("GET", "/secretchat/api/mailbox/envelopes"):
-                    return (200, Data(#"{"envelopes":[],"through":0,"nextAfter":0,"done":true}"#.utf8))
+                    return try httpReply(200, Data(#"{"envelopes":[],"through":0,"nextAfter":0,"done":true}"#.utf8))
                 case ("POST", "/secretchat/api/contacts/" + peer.wire + "/prekeys"):
                     fetches += 1
                     let keys = try JSONSerialization.data(withJSONObject: ["registrationId":peerBundle.registrationId,
                         "kyber":JSONSerialization.jsonObject(with: JSONEncoder().encode(peerBundle.kyber))])
-                    return (200, try JSONSerialization.data(withJSONObject: ["identityKey":peerBundle.identity.base64EncodedString(),
+                    return try httpReply(200, try JSONSerialization.data(withJSONObject: ["identityKey":peerBundle.identity.base64EncodedString(),
                         "accountId":peer.wire,"deviceId":device.wire,"signedPrekey":JSONEncoder().encode(peerBundle.signed).base64EncodedString(),
                         "protocolPrekeys":keys.base64EncodedString()]))
                 case ("POST", "/secretchat/api/mailbox/envelopes"):
@@ -51,13 +51,13 @@ final class DeviceFlowTests: XCTestCase {
                     submissions.append(submission)
                     XCTAssertEqual(try vault.load()?.outbox.first, submission)
                     if submissions.count == 1 { throw URLError(.networkConnectionLost) }
-                    return (202, try JSONSerialization.data(withJSONObject: ["reference":ref.wire,"expiresAtMs":submission.expiresAtMs]))
+                    return try httpReply(202, try JSONSerialization.data(withJSONObject: ["reference":ref.wire,"expiresAtMs":submission.expiresAtMs]))
                 case ("GET", "/secretchat/api/mailbox/outcomes/" + ref.wire):
-                    return (200, try JSONSerialization.data(withJSONObject: ["reference":ref.wire,"status":outcome]))
+                    return try httpReply(200, try JSONSerialization.data(withJSONObject: ["reference":ref.wire,"status":outcome]))
                 case ("PUT", "/secretchat/api/mailbox/push-token"):
                     sentToken = try JSONDecoder().decode([String:String].self, from: XCTUnwrap(request.httpBody))["token"]
-                    return (204, Data())
-                default: XCTFail("Unexpected route \(request.url?.path ?? "")"); return (500, Data())
+                    return try httpReply(204, Data())
+                default: XCTFail("Unexpected route \(request.url?.path ?? "")"); return try httpReply(500, Data())
                 }
             }
         }

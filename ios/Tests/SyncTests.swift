@@ -15,14 +15,14 @@ final class SyncTests: XCTestCase {
                 let url = try XCTUnwrap(request.url)
                 seen.append(url.path)
                 switch url.path {
-                case "/api/contacts": return (200, Data("[]".utf8))
+                case "/api/contacts": return try httpReply(200, Data("[]".utf8))
                 case "/api/mailbox/envelopes":
-                    if url.query?.contains("through=") == true { return (503, Data()) }
+                    if url.query?.contains("through=") == true { return try httpReply(503, Data()) }
                     let letter: [String: Any] = ["sequence":1,"reference":ref.wire,"messageId":UUID().wire,
                         "senderAccountId":UUID().wire,"senderDeviceId":UUID().wire,"ciphertext":"AQ==","expiresAtMs":1000]
-                    return (200, try JSONSerialization.data(withJSONObject: ["envelopes":[letter],
+                    return try httpReply(200, try JSONSerialization.data(withJSONObject: ["envelopes":[letter],
                         "through":2,"nextAfter":failOnDisk ? 2 : 1,"done":failOnDisk]))
-                default: XCTFail("Unexpected request"); return (500, Data())
+                default: XCTFail("Unexpected request"); return try httpReply(500, Data())
                 }
             }
             let sync = MailboxSync(service: service)
@@ -47,9 +47,9 @@ final class SyncTests: XCTestCase {
         var ackResults = [503, 204]
         let service = try Service(base: "https://test.invalid") { request in
             switch request.url?.path {
-            case "/api/contacts": return (200, Data("[]".utf8))
-            case "/api/mailbox/envelopes": return (200, Data(#"{"envelopes":[],"through":7,"nextAfter":7,"done":true}"#.utf8))
-            case "/api/mailbox/envelopes/" + ref.wire + "/ack": return (ackResults.removeFirst(), Data())
+            case "/api/contacts": return try httpReply(200, Data("[]".utf8))
+            case "/api/mailbox/envelopes": return try httpReply(200, Data(#"{"envelopes":[],"through":7,"nextAfter":7,"done":true}"#.utf8))
+            case "/api/mailbox/envelopes/" + ref.wire + "/ack": return try httpReply(ackResults.removeFirst(), Data())
             default: throw ClientError.invalidEnvelope
             }
         }
@@ -72,10 +72,10 @@ extension SyncTests {
         let ref = UUID()
         let service = try Service(base: "https://test.invalid") { request in
             let url = try XCTUnwrap(request.url)
-            if url.path == "/api/contacts" { return (200, Data("[]".utf8)) }
+            if url.path == "/api/contacts" { return try httpReply(200, Data("[]".utf8)) }
             if url.path.hasSuffix("/ack") {
                 XCTAssertEqual(commits.first, 6)
-                return (410, Data())
+                return try httpReply(410, Data())
             }
             let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
             let query = Dictionary(uniqueKeysWithValues: items.map { ($0.name, $0.value ?? "") })
@@ -84,10 +84,10 @@ extension SyncTests {
                 XCTAssertNil(query["through"])
                 let envelope: [String:Any] = ["reference":ref.wire,"messageId":UUID().wire,"senderAccountId":UUID().wire,
                     "senderDeviceId":UUID().wire,"expiresAtMs":1234,"sequence":3,"ciphertext":"AQ=="]
-                return (200, try JSONSerialization.data(withJSONObject: ["through":6,"nextAfter":3,"done":false,"envelopes":[envelope]]))
+                return try httpReply(200, try JSONSerialization.data(withJSONObject: ["through":6,"nextAfter":3,"done":false,"envelopes":[envelope]]))
             }
             XCTAssertEqual(query["through"], "6")
-            return (200, Data(#"{"through":6,"nextAfter":6,"done":true,"envelopes":[]}"#.utf8))
+            return try httpReply(200, Data(#"{"through":6,"nextAfter":6,"done":true,"envelopes":[]}"#.utf8))
         }
         try await MailboxSync(service: service).run(from: state) { next in
             commits.append(next.cursor)
@@ -110,9 +110,9 @@ extension SyncTests {
         for status in [409, 400] {
             var saved = initial
             let service = try Service(base: "https://service.test") { request in
-                if request.url?.path == "/api/contacts" { return (200, try JSONEncoder().encode([peer])) }
-                if request.httpMethod == "POST" { return (status, Data()) }
-                return (200, Data(#"{"through":0,"nextAfter":0,"done":true,"envelopes":[]}"#.utf8))
+                if request.url?.path == "/api/contacts" { return try httpReply(200, try JSONEncoder().encode([peer])) }
+                if request.httpMethod == "POST" { return try httpReply(status, Data()) }
+                return try httpReply(200, Data(#"{"through":0,"nextAfter":0,"done":true,"envelopes":[]}"#.utf8))
             }
             try await MailboxSync(service: service).run(from: saved) { saved = $0 }
             XCTAssertEqual(saved.outbox, status == 409 ? [queued] : [])
@@ -130,12 +130,12 @@ extension SyncTests {
         }
         let api = try Service(base: "https://test.invalid") { request in
             switch request.url?.path {
-            case "/api/contacts": return (200, Data("[]".utf8))
-            case "/api/mailbox/envelopes": return (200, Data(#"{"through":0,"nextAfter":0,"done":true,"envelopes":[]}"#.utf8))
-            case "/api/mailbox/outcomes/" + gone.wire: return (404, Data())
+            case "/api/contacts": return try httpReply(200, Data("[]".utf8))
+            case "/api/mailbox/envelopes": return try httpReply(200, Data(#"{"through":0,"nextAfter":0,"done":true,"envelopes":[]}"#.utf8))
+            case "/api/mailbox/outcomes/" + gone.wire: return try httpReply(404, Data())
             case "/api/mailbox/outcomes/" + expired.wire:
-                return (200, try JSONSerialization.data(withJSONObject: ["reference":expired.wire,"status":"expired"]))
-            default: XCTFail(); return (500, Data())
+                return try httpReply(200, try JSONSerialization.data(withJSONObject: ["reference":expired.wire,"status":"expired"]))
+            default: XCTFail(); return try httpReply(500, Data())
             }
         }
         try await MailboxSync(service: api).run(from: state) { state = $0 }

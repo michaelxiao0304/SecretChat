@@ -8,7 +8,7 @@ final class DiagnosticsTests: XCTestCase {
         let ref = UUID()
         var lines: [DiagnosticRecord] = []
         let api = try Service(base: "https://" + endpoint, token: token) { _ in
-            (401, Data("response-secret".utf8))
+            try httpReply(401, Data("response-secret".utf8))
         }
         await Diagnostics.$observer.withValue({ lines.append($0) }) {
             do { _ = try await api.envelope(ref); XCTFail("Expected HTTP failure") } catch {}
@@ -44,9 +44,9 @@ extension DiagnosticsTests {
         let challengeID = UUID()
         let api = try Service(base: "https://server.invalid", token: "secret-device-token") { request in
             if request.url?.path.hasSuffix("challenges") == true {
-                return (200, try JSONSerialization.data(withJSONObject: ["challengeId":challengeID.wire]))
+                return try httpReply(200, try JSONSerialization.data(withJSONObject: ["challengeId":challengeID.wire]))
             }
-            return (204, Data())
+            return try httpReply(204, Data())
         }
         var records: [DiagnosticRecord] = []
         try await Diagnostics.$observer.withValue({ records.append($0) }) {
@@ -82,5 +82,41 @@ extension DiagnosticsTests {
         XCTAssertEqual(records.compactMap { $0.reason?.rawValue }, ["unknownSender","blocked","deviceChanged","expired"])
         XCTAssertFalse(records.map(\.line).joined().contains(peer.wire))
         XCTAssertFalse(records.map(\.line).joined().contains(device.wire))
+    }
+}
+
+extension DiagnosticsTests {
+    func testServerRequestIDLinksErrorToServerAndRejectsMalformedHeaders() async throws {
+        let requestID = UUID()
+        for header in [requestID.wire, "private@example.test", ""] {
+            var lines: [DiagnosticRecord] = []
+            let api = try Service(base: "https://service.test") { _ in
+                try httpReply(409, Data(), headers: ["X-Request-ID":header])
+            }
+            await Diagnostics.$observer.withValue({ lines.append($0) }) {
+                do { _ = try await api.invite(); XCTFail("Expected conflict") }
+                catch {
+                    XCTAssertEqual(error.localizedDescription.contains(requestID.wire), header == requestID.wire)
+                    XCTAssertFalse(error.localizedDescription.contains("private@example.test"))
+                }
+            }
+            let failure = try XCTUnwrap(lines.first { $0.phase == .failed })
+            XCTAssertEqual(failure.requestID, header == requestID.wire ? requestID : nil)
+            XCTAssertFalse(failure.line.contains("private@example.test"))
+        }
+    }
+
+    func testSuccessfulResponseLogsRequestIDWithLocalTrace() async throws {
+        let requestID = UUID()
+        var lines: [DiagnosticRecord] = []
+        let api = try Service(base: "https://service.test") { _ in
+            try httpReply(200, Data(#"{"code":"secret-invite"}"#.utf8), headers: ["X-Request-ID":requestID.wire])
+        }
+        _ = try await Diagnostics.$observer.withValue({ lines.append($0) }) { try await api.invite() }
+        let response = try XCTUnwrap(lines.first { $0.requestID == requestID })
+        XCTAssertEqual(response.code, 200)
+        XCTAssertTrue(response.line.contains("requestId=" + requestID.wire))
+        XCTAssertFalse(lines.map(\.line).joined().contains("secret-invite"))
+        XCTAssertEqual(Set(lines.map(\.trace)).count, 1)
     }
 }

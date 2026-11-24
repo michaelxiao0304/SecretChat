@@ -16,7 +16,7 @@ final class ServiceTests: XCTestCase {
             XCTAssertNil(request.url?.query)
             XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer device-token")
             XCTAssertEqual(request.httpMethod, "GET")
-            return (200, try JSONSerialization.data(withJSONObject: ["sequence": 9, "reference": ref.wire,
+            return try httpReply(200, try JSONSerialization.data(withJSONObject: ["sequence": 9, "reference": ref.wire,
                 "senderAccountId": sender.wire, "senderDeviceId": device.wire, "messageId": message.wire,
                 "expiresAtMs": 2000, "ciphertext": "AQ=="]))
         }
@@ -36,7 +36,7 @@ final class ServiceTests: XCTestCase {
             XCTAssertEqual(body["identityKey"], bundle.identity.base64EncodedString())
             let signed = try JSONDecoder().decode(PublicPrekey.self, from: XCTUnwrap(Data(base64Encoded: body["signedPrekey"] ?? "")))
             XCTAssertEqual(signed.key, bundle.signed.key)
-            return (201, try JSONSerialization.data(withJSONObject: ["accountId":accountId.wire, "deviceId":deviceId.wire,"token":"test"]))
+            return try httpReply(201, try JSONSerialization.data(withJSONObject: ["accountId":accountId.wire, "deviceId":deviceId.wire,"token":"test"]))
         }
         let account = try await service.register(email: "alice", invite: "once", challenge: nil, code: "", bundle: bundle)
         XCTAssertEqual(account.deviceId, deviceId)
@@ -44,7 +44,7 @@ final class ServiceTests: XCTestCase {
 
     func testBadStatusAndMalformedSuccessNeverProduceReceipt() async throws {
         for status in [401, 409, 429, 503, 202] {
-            let service = try Service(base: "https://test.invalid") { _ in (status, Data()) }
+            let service = try Service(base: "https://test.invalid") { _ in try httpReply(status, Data()) }
             let packet = Outgoing(recipientAccountId: UUID(), recipientDeviceId: UUID(), messageId: UUID(),
                                   expiresAtMs: 1234, ciphertext: Data([1]))
             do {
@@ -76,9 +76,9 @@ extension ServiceTests {
             case "/api/challenges":
                 let body = try JSONDecoder().decode([String:String].self, from: XCTUnwrap(request.httpBody))
                 XCTAssertEqual(body, ["purpose":"register","email":"me@test.invalid"])
-                return (200, try JSONSerialization.data(withJSONObject: ["challengeId":id.wire]))
-            case "/api/invites": return (200, Data(#"{"code":"single-use"}"#.utf8))
-            default: XCTFail(); return (500, Data())
+                return try httpReply(200, try JSONSerialization.data(withJSONObject: ["challengeId":id.wire]))
+            case "/api/invites": return try httpReply(200, Data(#"{"code":"single-use"}"#.utf8))
+            default: XCTFail(); return try httpReply(500, Data())
             }
         }
         let challenge = try await api.challenge(email: "me@test.invalid")
@@ -93,7 +93,7 @@ extension ServiceTests {
         let api = try Service(base: "https://service.test") { request in
             let body: [String:Any] = ["reference":other.wire,"expiresAtMs":44,"status":"received","sequence":2,
                 "messageId":id.wire,"senderAccountId":other.wire,"senderDeviceId":device.wire,"ciphertext":"AQ=="]
-            return (request.httpMethod == "POST" ? 202 : 200, try JSONSerialization.data(withJSONObject: body))
+            return try httpReply(request.httpMethod == "POST" ? 202 : 200, try JSONSerialization.data(withJSONObject: body))
         }
         do { _ = try await api.submit(input); XCTFail() } catch ClientError.invalidEnvelope {}
         do { _ = try await api.envelope(id); XCTFail() } catch ClientError.invalidEnvelope {}

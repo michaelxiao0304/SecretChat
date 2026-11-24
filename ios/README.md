@@ -21,7 +21,7 @@ xcrun xccov view --report /tmp/SecretChatTests.xcresult
 
 ## 两台设备联调
 
-1. 提供实现目录和信箱接口的开发服务。客户端对齐 `codex/service-console-foundation` 的 `db8eec1`。输入证书受设备信任的 HTTPS 服务根地址，保留部署前缀，例如 `https://<开发域名>/secretchat`。同一地址的 `/ws` 需要支持 WSS。
+1. 提供实现目录和信箱接口的开发服务。客户端对齐 `codex/service-console-foundation` 的目录和信箱协议，已核对至 `08b6832`。输入证书受设备信任的 HTTPS 服务根地址，保留部署前缀，例如 `https://<开发域名>/secretchat`。同一地址的 `/ws` 需要支持 WSS。
 2. 在 Xcode 给主应用和通知扩展选择开发团队，配置团队拥有的两个 bundle ID、同一个 App Group（项目设置 `SECRETCHAT_APP_GROUP`），并为主应用启用开发环境 Push Notifications。服务端的 APNs topic 应与主应用 bundle ID 一致。
 3. 在服务控制台领取首账号邀请码，在第一台 iPhone 填写邮箱并完成注册。只有服务已开启免验证码联调模式时才打开相应开关。第一台设备生成单次邀请，第二台用它注册。双方回到前台或下拉刷新即可打开对话。
 4. 两台各发送一条文字，观察发送状态。接收端离线时再发送，重新打开后核对消息和状态。设备首次解锁后，允许通知并测试锁屏、后台、强制退出以及拒绝通知权限。记录实际推送延迟和失败时的固定文案。
@@ -43,7 +43,7 @@ xcrun simctl spawn <设备ID> log stream --level info --predicate 'subsystem == 
 xcrun simctl spawn <设备ID> log show --last 10m --info --predicate 'subsystem == "chat.secretchat.ios"'
 ```
 
-按复现时间和 `trace` 还原一次操作，先找 `failed`、`retry`、`skip` 或 `fallback`，再向前查看阶段。主应用与扩展分别生成随机追踪号。`elapsed_ms` 来自单调时钟；`code` 在网络阶段表示 HTTP 状态或 URL 错误码，在 Keychain 阶段表示 OSStatus。信息级记录的保留时间由系统管理，联调时可提前开启实时采集。
+按复现时间和 `trace` 还原一次操作，先找 `failed`、`retry`、`skip` 或 `fallback`，再向前查看阶段。主应用与扩展分别生成随机追踪号。有 HTTP 响应时，客户端验证 `X-Request-ID` 并记录 `requestId`。HTTP 失败提示也显示此编号，可在服务端应用日志中精确查找 `requestId=<编号>`。网络中断或旧服务未提供该头时，可用本地 `trace` 与复现时间定位。`elapsed_ms` 来自单调时钟；`code` 在网络阶段表示 HTTP 状态或 URL 错误码，在 Keychain 阶段表示 OSStatus。信息级记录的保留时间由系统管理，联调时可提前开启实时采集。
 
 | 症状 | 先查的分类和事件 |
 |---|---|
@@ -53,7 +53,7 @@ xcrun simctl spawn <设备ID> log show --last 10m --info --predicate 'subsystem 
 | 重连后缺消息或无法解密 | `network/socket.listen`、`socket.reconnect`、`mailbox/inbox.page`、`inbox.committed`、`inbox.discard`、`protocolState/inbox.decrypt` 和 ACK 请求 |
 | 锁屏只出现固定文案 | `push/apns.permission`、`apns.registration`、令牌绑定请求，以及扩展的 `extension.receive`、`preview.policy`、`preview.render`、`extension.deadline` |
 
-日志字段限制为固定阶段名、随机追踪号、枚举、数量、状态码和耗时。请求地址、动态路径、账号、邮箱、邀请码、验证码、消息 ID、推送引用、令牌、密钥、网络报文和私聊正文均不进入应用日志。系统日志仅保存在设备的统一日志设施中。
+日志字段限制为固定阶段名、随机追踪号、已校验的服务端请求编号、枚举、数量、状态码和耗时。请求地址、动态路径、账号、邮箱、邀请码、验证码、消息 ID、推送引用、令牌、密钥、网络报文和私聊正文均不进入应用日志。系统日志仅保存在设备的统一日志设施中。
 
 ## 本轮验收范围
 
@@ -66,3 +66,5 @@ xcrun simctl spawn <设备ID> log show --last 10m --info --predicate 'subsystem 
 3. 以模拟器验证两套设备身份的双向收发，再接入加密快照、持久待发和 ACK 队列、分页边界与身份检查。加入网络回包丢失、磁盘提交失败和一次性预密钥消费的回归。
 4. 加入跨阶段追踪日志，用系统日志实际还原一次注入的断网故障。提交、同步、设备操作三个失败事件带有同一个追踪号，网络层记录 `URLError -1005`。用例同时检查成功、失败和回退路径的脱敏。
 5. 使用 XCTest 和 Xcode 行覆盖报告进行验证。`ub-mode` 列出的三个工具当前支持的语言未包含 Swift。变异检查使用临时源码副本，在相同模拟器上运行对应的 XCTest。[Crapper 支持范围](https://github.com/unclebob/crapper) · [Dryer 支持范围](https://github.com/unclebob/dryer) · [Mutator 支持范围](https://github.com/unclebob/mutator)
+6. 对齐服务端 `X-Request-ID` 并验证响应头白名单。最终在 iPhone 18 Pro 模拟器（iOS 27.2）运行 37 个 XCTest，全部通过，跳过 0 个。主应用行覆盖率为 69.9%，会话适配文件为 100%，设备状态文件为 97.2%。三个定向变异分别被消息 ID 校验、到期边界和通知隐私用例捕获。
+7. 使用 iPhoneOS SDK 构建 Release，检查主程序与内嵌扩展均为 arm64，最终产物设备族为 iPhone。该检查使用未签名构建，真实 APNs 投递仍需按联调步骤验收。
