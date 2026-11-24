@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>管理员登录 · SecretChat</title>
+  <link rel="stylesheet" href="console.css">
+  <script type="module" src="login.js"></script>
+</head>
+<body class="login-page">
+  <header class="masthead"><span class="brand"><i class="mark" aria-hidden="true"></i>SecretChat</span><span class="section-name">运营控制台</span></header>
+  <main class="login-panel">
+    <h1>管理员登录</h1>
+    <form id="login" method="post" action="../admin-api/login">
+      <label for="username">管理员账号</label>
+      <input id="username" name="username" autocomplete="username" required autofocus>
+      <label for="password">密码</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <p class="error" role="alert" hidden></p>
+      <button class="primary" type="submit">登录</button>
+    </form>
+  </main>
+</body>
+</html>

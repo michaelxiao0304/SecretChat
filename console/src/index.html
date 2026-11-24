@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>队列概览 · SecretChat</title>
+  <link rel="stylesheet" href="console.css">
+  <script type="module" src="dashboard.js"></script>
+</head>
+<body>
+  <header class="masthead"><span class="brand"><i class="mark" aria-hidden="true"></i>SecretChat</span><span class="section-name">运营控制台</span><button id="logout" class="quiet">退出登录</button></header>
+  <main class="dashboard">
+    <div class="heading-row"><h1>队列概览</h1><button class="secondary" id="refresh">刷新</button></div>
+    <p class="error" role="alert" hidden></p>
+    <dl class="metrics" aria-live="polite">
+      <div><dt>待投递信封</dt><dd id="pending">—</dd></div>
+      <div><dt>最早信封等待时间</dt><dd id="wait">—</dd></div>
+    </dl>
+    <p class="status" id="status" role="status"></p>
+  </main>
+</body>
+</html>
