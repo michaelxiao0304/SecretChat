@@ -1,4 +1,4 @@
-import { change, request } from './client.js';
+import { change, failureMessage, request } from './client.js';
 import { decryptReport } from './report-crypto.js';
 
 const el = id => document.getElementById(id);
@@ -12,7 +12,7 @@ let viewEpoch = 0;
 
 function failure(error, message) {
   if (error.status === 401) return location.replace('login.html');
-  write('ops-error', message);
+  write('ops-error', failureMessage(message, error));
   el('ops-error').hidden = false;
 }
 

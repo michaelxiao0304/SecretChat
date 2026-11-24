@@ -7,9 +7,16 @@ export function formatWait(seconds) {
 export async function request(endpoint, options = {}, http = fetch) {
   const response = await http('../admin-api/' + endpoint, {credentials:'same-origin', ...options});
   if (!response.ok) {
-    throw Object.assign(new Error('HTTP ' + response.status), {status:response.status});
+    const error = Object.assign(new Error('HTTP ' + response.status), {status:response.status});
+    const id = response.headers.get('X-Request-ID');
+    if (/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/.test(id)) error.requestId = id;
+    throw error;
   }
   if (response.status !== 204) return response.json();
+}
+
+export function failureMessage(message, error) {
+  return error.requestId ? message + ' 请求编号：' + error.requestId : message;
 }
 
 export async function submitForm(endpoint, fields, http = fetch) {

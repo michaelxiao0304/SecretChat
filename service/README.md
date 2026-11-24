@@ -47,6 +47,28 @@ Nginx 将整个 `/secretchat/` 去掉前缀转发到 Spring Boot，覆盖控制�
 | `GET /admin-api/queue` | 管理员可读，只返回两项汇总指标；未登录返回 401 |
 | `POST /admin-api/logout` | 带当前 CSRF 头使会话失效，成功返回 204；缺少有效令牌返回 403 |
 
+## 联调日志
+
+控制台的 HTTP 错误提示会显示请求编号。测试设备可从 API 响应头 `X-Request-ID` 读取同一编号。每次请求由服务端新建编号；重试会得到新编号。浏览器未收到 HTTP 响应时，可用复现时间和操作步骤定位。
+
+登录阿里云开发机后，在应用日志中按编号精确查找。跨日或文件分卷后可查压缩归档。
+
+```sh
+request_id='<页面或响应头中的请求编号>'
+log=/var/log/secretchat/application/service.log
+grep -F "requestId=$request_id" "$log"
+zgrep -hF "requestId=$request_id" "$log".*.gz
+```
+
+| 要排查的问题 | 查看内容 |
+|---|---|
+| 注册、邀请、投递、ACK、举报及控制台登录失败 | `event=http_request` 包含 HTTP 方法、路由模板、状态码和服务端耗时（毫秒）。由业务代码抛出的异常还记录异常类型及 `类.方法:行号`，对应当前部署提交。安全过滤器提前拒绝时可按状态码及路由范围定位。 |
+| 邮件或推送未送达 | 先看控制台“运行概览”中的供应商配置。已尝试外部调用时，`provider_failure` 区分供应商 HTTP 错误、无效令牌和传输错误。`push_retry` 与 `push_exhausted` 给出重试次数及结果。 |
+| 到期清理、WebSocket 异常或后台任务中断 | 按复现时间查 `mailbox_cleanup` 的计数、`ws_failure` 的分类，以及 `mailbox_job_failure` 或 `scheduled_failure`。后台调度独立运行，按时间及事件类型检索。 |
+| 审核或邀请操作 | 控制台“操作记录”可按操作员和动作核对；工单号留存在受权限保护的审计数据中。 |
+
+本地默认输出到终端。云端设置 `LOGGING_FILE_NAME=/var/log/secretchat/application/service.log` 和 `LOGGING_CONSOLE_ENABLED=false`，由 Logback 按日或每卷 5 MB 压缩归档，最多保留 7 个归档日，归档总量上限 35 MB。JVM 启动阶段的标准输出由 Supervisor 接收，可用 `supervisorctl tail secretchat-service stdout` 查看。项目的 Nginx access log 保持关闭。请求日志仅使用路由模板和固定字段，排除原始 URL、查询串、请求体、凭据和举报材料。
+
 ## 自动化验证
 
 以下命令分别在对应目录运行。控制台测试需要 Node.js 20 或以上版本，本机 Chrome 或通过 `CHROME_EXECUTABLE` 指定的 Chromium。浏览器测试自行启动打包后的 JAR 和测试代理，使用随机端口和一次性测试密码。

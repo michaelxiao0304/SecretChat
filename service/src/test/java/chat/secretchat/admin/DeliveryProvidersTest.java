@@ -92,6 +92,32 @@ class DeliveryProvidersTest {
         verify(failures,times(4)).record("push");
     }
 
+    @Test void diagnosticsExposeOnlyTheProviderFailureCategoryAndHttpStatus() throws Exception {
+        var env = new MockEnvironment().withProperty("SECRETCHAT_MAIL_API_KEY", "private-key")
+            .withProperty("SECRETCHAT_MAIL_FROM", "sender@example.org").withProperty("SECRETCHAT_APNS_TOPIC", "private-topic");
+        var signer = mock(ApnsSigner.class);
+        when(signer.token()).thenReturn("private-token");
+        var configured = provider(env, signer);
+        try (var logs = new DeliveryLogCapture(DeliveryProviders.class)) {
+            configured.sendEmail("test@example.org", "654321");
+            assertThat(logs.messages()).isEmpty();
+            code = 429;
+            result = "private response from " + endpoint;
+            assertThatThrownBy(() -> configured.sendEmail("test@example.org", "654321")).isInstanceOf(ResponseStatusException.class);
+            code = 410;
+            configured.sendPush("c1".repeat(32), "private-reference");
+            code = 503;
+            configured.sendPush("c1".repeat(32), "private-reference");
+            server.stop(0);
+            configured.sendPush("c1".repeat(32), "private-reference");
+            assertThat(logs.messages()).containsExactly(
+                "event=provider_failure provider=email reason=http status=429",
+                "event=provider_failure provider=push reason=invalid_token status=410",
+                "event=provider_failure provider=push reason=http status=503",
+                "event=provider_failure provider=push reason=transport");
+        }
+    }
+
     @Test void signerLoadsConfiguredKeyAndRefreshesAfter45Minutes(@org.junit.jupiter.api.io.TempDir java.nio.file.Path temp) throws Exception {
         var keys=KeyPairGenerator.getInstance("EC");
         keys.initialize(new ECGenParameterSpec("secp256r1"));

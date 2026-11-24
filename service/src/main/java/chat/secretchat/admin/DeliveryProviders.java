@@ -5,6 +5,8 @@ import java.net.URI;
 import java.net.http.*;
 import java.time.*;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @Component
 class DeliveryProviders {
+    private static final Logger log = LoggerFactory.getLogger(DeliveryProviders.class);
     enum PushResult { DELIVERED, INVALID_TOKEN, RETRY, UNCONFIGURED }
     private final Environment env;
     private final ProviderFailures failures;
@@ -53,7 +56,7 @@ class DeliveryProviders {
         var request=post(emailEndpoint,data).header("Authorization","Bearer "+setting("SECRETCHAT_MAIL_API_KEY")).build();
         var response=send(request);
         if(response!=null && response.statusCode()/100==2) return;
-        failures.record("email");
+        recordFailure("email", response, "http");
         throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Email provider unavailable");
     }
 
@@ -67,8 +70,15 @@ class DeliveryProviders {
                 .header("apns-collapse-id",reference).build();
         var response=send(request);
         if(response!=null && response.statusCode()==200) return PushResult.DELIVERED;
-        failures.record("push");
-        return classifyPushFailure(response);
+        var disposition = classifyPushFailure(response);
+        recordFailure("push", response, disposition == PushResult.INVALID_TOKEN ? "invalid_token" : "http");
+        return disposition;
+    }
+
+    private void recordFailure(String provider, HttpResponse<String> response, String reason) {
+        if (response == null) log.warn("event=provider_failure provider={} reason=transport", provider);
+        else log.warn("event=provider_failure provider={} reason={} status={}", provider, reason, response.statusCode());
+        failures.record(provider);
     }
 
     private PushResult classifyPushFailure(HttpResponse<String> response) {

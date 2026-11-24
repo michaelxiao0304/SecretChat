@@ -1,4 +1,4 @@
-import { formatWait, request, submitForm } from './client.js';
+import { failureMessage, formatWait, request, submitForm } from './client.js';
 
 const refresh = document.querySelector('#refresh');
 const logout = document.querySelector('#logout');
@@ -7,8 +7,8 @@ const wait = document.querySelector('#wait');
 const status = document.querySelector('#status');
 const alert = document.querySelector('[role=alert]');
 
-function showError(message) {
-  alert.textContent = message;
+function showError(message, error) {
+  alert.textContent = failureMessage(message, error);
   alert.hidden = false;
 }
 
@@ -26,7 +26,7 @@ async function loadQueue() {
     pending.textContent = '—';
     wait.textContent = '—';
     status.textContent = '';
-    showError('队列指标加载失败，请稍后刷新。');
+    showError('队列指标加载失败，请稍后刷新。', error);
   } finally {
     refresh.disabled = false;
   }
@@ -37,8 +37,8 @@ logout.addEventListener('click', async () => {
   try {
     await submitForm('logout', {});
     location.replace('login.html');
-  } catch {
-    showError('退出失败，请重试。');
+  } catch (error) {
+    showError('退出失败，请重试。', error);
   } finally {
     logout.disabled = false;
   }

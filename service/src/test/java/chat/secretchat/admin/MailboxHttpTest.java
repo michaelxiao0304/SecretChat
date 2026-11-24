@@ -261,6 +261,38 @@ class MailboxHttpTest {
         org.mockito.Mockito.verify(providers, org.mockito.Mockito.never()).sendPush(token, second);
     }
 
+    @Test void cleanupAndRetryDiagnosticsCountCompletedWorkAndStaySilentOnIdlePolls() throws Exception {
+        try (var logs = new DeliveryLogCapture(MailboxMaintenance.class)) {
+            maintenance.expire();
+            maintenance.push();
+            assertThat(logs.messages()).isEmpty();
+            String token = "e9".repeat(32);
+            assertThat(call("PUT", "bob", "/push-token", "{\"token\":\"" + token + "\"}").statusCode()).isEqualTo(204);
+            String ref = reference(send(envelope(id(), NOW + 400000)));
+            when(providers.sendPush(token, ref)).thenReturn(DeliveryProviders.PushResult.RETRY)
+                .thenThrow(new IllegalStateException("private provider message " + ref))
+                .thenReturn(DeliveryProviders.PushResult.RETRY);
+            for (int attempt = 0; attempt < 5; attempt++) {
+                maintenance.push();
+                time.addAndGet(65000);
+            }
+            time.set(NOW + 400000);
+            maintenance.expire();
+            time.addAndGet(MailboxService.MAX_TTL);
+            maintenance.expire();
+            maintenance.expire();
+            maintenance.push();
+            assertThat(logs.messages()).containsExactly(
+                "event=push_retry reason=provider attempt=1 delayMs=1000",
+                "event=push_retry reason=worker attempt=2 delayMs=30000",
+                "event=push_retry reason=provider attempt=3 delayMs=16000",
+                "event=push_retry reason=provider attempt=4 delayMs=64000",
+                "event=push_exhausted reason=provider attempts=5",
+                "event=mailbox_cleanup expired=1 ciphertextDeleted=1 receiptsDeleted=0",
+                "event=mailbox_cleanup expired=0 ciphertextDeleted=0 receiptsDeleted=1");
+        }
+    }
+
     @Test void rejectsMalformedSubmissionsAndPaginationBounds() throws Exception {
         String body = envelope(id(), NOW + MailboxService.MAX_TTL);
         assertThat(send(body).statusCode()).isEqualTo(202);
