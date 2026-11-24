@@ -7,7 +7,8 @@ final class FailureSite {
         for (int depth = 0; failure != null && depth < 8; depth++, failure = failure.getCause()) {
             for (StackTraceElement frame : failure.getStackTrace()) {
                 String type = frame.getClassName();
-                if (type.startsWith("chat.secretchat.admin.") && !type.contains("$$")) {
+                if (type.startsWith("chat.secretchat.admin.") && !type.contains("$$")
+                        && !type.equals(RequestDiagnostics.class.getName())) {
                     site = type.substring(type.lastIndexOf('.') + 1) + "." + frame.getMethodName() + ":" + frame.getLineNumber();
                     break;
                 }

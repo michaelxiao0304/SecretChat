@@ -48,6 +48,15 @@ class RequestDiagnosticsHttpTest {
         assertThat(output.getAll()).doesNotContain("query-redaction-marker", "private-password-marker");
     }
 
+    @Test void invalidJsonIsAttributedToTheFrameworkBeforeTheControllerRuns(CapturedOutput output) throws Exception {
+        var reply = http.send(at("/api/accounts").header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString("{\"private-json-marker\":123}")).build(),
+            HttpResponse.BodyHandlers.discarding());
+        assertThat(completion(reply, output)).contains("route=/api/accounts status=400",
+            "error=HttpMessageNotReadableException source=framework");
+        assertThat(output.getAll()).doesNotContain("private-json-marker");
+    }
+
     private HttpRequest.Builder at(String path) {
         return HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + path));
     }
