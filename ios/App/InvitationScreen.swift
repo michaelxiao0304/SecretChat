@@ -28,66 +28,83 @@ struct InvitationAction: ButtonStyle {
 struct RegistrationScreen: View {
     @ObservedObject var model: DeviceModel
     @State private var draft = RegistrationDraft()
-    @State private var opened = false
     @State private var settings = false
+    @State private var editedSettings = RegistrationServiceSettings(server: "")
+    @State private var settingsError: String?
     @State private var pasteNote: String?
-    // Keep the setup field on screen while the user is typing a previously missing URL.
-    @State private var needsAddress = !RegistrationDraft().hasService
+    @FocusState private var editingInvite: Bool
+
+    private var hideInvite: Bool { !editingInvite && !draft.invite.isEmpty }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                if opened { registration } else { invitation }
+                invitation
+                registration
             }
             .frame(maxWidth: 540, alignment: .leading)
             .padding(.horizontal, 24).padding(.vertical, 20)
             .frame(maxWidth: .infinity)
         }
-        .onChange(of: draft.hasService) { if !draft.hasService { needsAddress = true } }
         .background(InvitationStyle.paper)
         .scrollDismissesKeyboard(.interactively)
         .disabled(model.busy)
         .toolbar {
-            if opened {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("邀请", systemImage: "chevron.backward") { opened = false }
-                        .disabled(model.busy)
-                }
-            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("开发联调", systemImage: "slider.horizontal.3") {
                     Diagnostics.event(.account, "registration.settings", .ok)
+                    editedSettings = RegistrationServiceSettings(server: draft.server, development: draft.development)
+                    settingsError = nil
                     settings = true
                 }.disabled(model.busy)
             }
         }
-        .sheet(isPresented: $settings, onDismiss: { needsAddress = !draft.hasService }) {
+        .sheet(isPresented: $settings) {
             NavigationStack {
                 Form {
                     Section {
-                        addressField
-                        Toggle("服务已开启免验证码联调", isOn: $draft.development)
-                    } footer: { Text("仅在测试服务已开启免验证码注册时打开。") }
+                        TextField("HTTPS 服务根地址（含部署前缀）", text: $editedSettings.server)
+                            .textInputAutocapitalization(.never).autocorrectionDisabled()
+                            .onChange(of: editedSettings.server) { settingsError = nil }
+                        Toggle("服务已开启免验证码联调", isOn: $editedSettings.development)
+                    } footer: {
+                        if let settingsError { Text(settingsError).foregroundStyle(.red) }
+                        else { Text("仅在测试服务已开启免验证码注册时打开。") }
+                    }
                 }
                 .navigationTitle("开发联调").navigationBarTitleDisplayMode(.inline)
-                .toolbar { Button("完成") { settings = false } }
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("完成") {
+                            do {
+                                let saved = try editedSettings.save()
+                                draft.server = saved.server
+                                draft.development = saved.development
+                                Diagnostics.event(.account, "registration.settings.saved", .ok)
+                                settings = false
+                            } catch {
+                                settingsError = "请填写 HTTPS 主机和路径，例如 example.com/secretchat。地址中不能包含空格、账号或查询参数。"
+                                Diagnostics.failure(.account, "registration.settings.saved", error)
+                            }
+                        }
+                    }
+                }
             }.protectedSurface()
         }
     }
 
     private var invitation: some View {
         Group {
-            ZStack {
-                RoundedRectangle(cornerRadius: 10).fill(Color(red: 0.86, green: 0.92, blue: 0.94))
+            HStack(spacing: 12) {
+                Text("凭邀请加入").font(.largeTitle.bold()).accessibilityAddTraits(.isHeader)
+                Spacer(minLength: 0)
                 if let letter = InvitationStyle.letter {
                     Image(uiImage: letter).resizable().scaledToFit()
-                } else {
-                    Image(systemName: "envelope.open.fill").font(.largeTitle).foregroundStyle(InvitationStyle.blue)
+                        .frame(width: 92).clipShape(RoundedRectangle(cornerRadius: 8))
+                        .accessibilityHidden(true)
                 }
             }
-            .aspectRatio(322.0 / 235.0, contentMode: .fit).accessibilityHidden(true)
-            Text("凭邀请加入").font(.largeTitle.bold()).accessibilityAddTraits(.isHeader)
-            Text("粘贴朋友分享的邀请，或输入一次性邀请码，再验证你的邮箱。")
+            Text("粘贴朋友分享的邀请，或手动输入邀请码，然后填写邮箱。")
                 .foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 8) {
                 Divider()
@@ -103,57 +120,39 @@ struct RegistrationScreen: View {
                         }
                     }.controlSize(.small)
                 }
-                SecureField("输入或粘贴邀请码", text: $draft.invite)
+                TextField("输入或粘贴邀请码", text: $draft.invite)
+                    .focused($editingInvite)
                     .textInputAutocapitalization(.never).autocorrectionDisabled()
                     .font(.body.monospaced()).frame(minHeight: 44)
+                    .foregroundStyle(hideInvite ? Color.clear : Color.primary)
+                    .overlay(alignment: .leading) {
+                        if hideInvite { Text("••••••••").allowsHitTesting(false).accessibilityHidden(true) }
+                    }
+                    .accessibilityValue(hideInvite ? "已填写邀请码" : draft.invite)
                     .accessibilityIdentifier("invite.code")
+                    .privacySensitive()
                 Divider()
             }
             if let pasteNote { Text(pasteNote).font(.footnote).foregroundStyle(.secondary) }
-            Button("展开邀请") {
-                needsAddress = !draft.hasService
-                Diagnostics.event(.account, "invitation.open", .ok)
-                opened = true
-            }
-            .buttonStyle(InvitationAction())
         }
     }
 
     private var registration: some View {
         Group {
-            Label("一次性邀请", systemImage: "envelope.open").foregroundStyle(InvitationStyle.ink)
-            Text(draft.development ? "注册这台设备" : "验证你的邮箱")
-                .font(.largeTitle.bold()).accessibilityAddTraits(.isHeader)
-            Text(draft.development ? "此测试服务将使用邮箱和邀请码注册。" : "验证码会发到这个邮箱。")
-                .foregroundStyle(.secondary)
-            VStack(alignment: .leading, spacing: 6) {
-                Text("一次性邀请码").font(.headline)
-                SecureField("输入或粘贴邀请码", text: $draft.invite)
-                    .textInputAutocapitalization(.never).autocorrectionDisabled().textFieldStyle(.roundedBorder)
-            }
-            if !needsAddress && draft.hasService {
-                LabeledContent("邀请服务") {
-                    Text(draft.serviceRoot).multilineTextAlignment(.trailing)
-                }.font(.footnote).foregroundStyle(.secondary)
-            }
-            if !draft.matchesInvitationService {
-                Text("这张邀请属于其他服务。请恢复原服务地址，或替换为当前服务签发的邀请码。")
-                    .font(.footnote).foregroundStyle(InvitationStyle.ink)
-            }
-            if needsAddress || !draft.hasService {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("邀请服务地址").font(.headline)
-                    addressField.textFieldStyle(.roundedBorder)
-                    Text("此安装包未预设服务。请填写邀请人提供的 HTTPS 服务根地址。")
-                        .font(.footnote).foregroundStyle(.secondary)
-                }
-            }
             VStack(alignment: .leading, spacing: 6) {
                 Text("邮箱").font(.headline)
                 TextField("name@example.com", text: $draft.email)
-                    .textContentType(.emailAddress).keyboardType(.emailAddress)
+                    .textContentType(.emailAddress)
                     .textInputAutocapitalization(.never).autocorrectionDisabled()
                     .textFieldStyle(.roundedBorder)
+            }
+            if !draft.matchesInvitationService {
+                Text("邀请与当前服务不匹配。请在「开发联调」核对，或换用当前服务签发的邀请。")
+                    .font(.footnote).foregroundStyle(InvitationStyle.ink)
+            }
+            if !draft.hasService && !draft.inviteCode.isEmpty {
+                Text("请粘贴朋友分享的完整邀请，或在「开发联调」选择服务。")
+                    .font(.footnote).foregroundStyle(.secondary)
             }
             if !draft.development {
                 Button(draft.challenge == nil ? "获取邮箱验证码" : "重新获取验证码") {
@@ -163,11 +162,12 @@ struct RegistrationScreen: View {
                     } }
                 }.disabled(!draft.canRequestCode)
                 if draft.challenge != nil {
-                    TextField("六位邮箱验证码", text: $draft.code).keyboardType(.numberPad)
+                    TextField("六位邮箱验证码", text: $draft.code)
+                        .textInputAutocapitalization(.never).autocorrectionDisabled()
                         .textContentType(.oneTimeCode).textFieldStyle(.roundedBorder)
                 }
             }
-            Button("注册并打开联系人") {
+            Button("注册") {
                 Task { await model.perform {
                     try await model.register(server: draft.serviceRoot, email: draft.address, invite: draft.inviteCode,
                                              challenge: draft.challenge, code: draft.code)
@@ -177,8 +177,4 @@ struct RegistrationScreen: View {
         }
     }
 
-    private var addressField: some View {
-        TextField("HTTPS 服务根地址（含部署前缀）", text: $draft.server)
-            .keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
-    }
 }

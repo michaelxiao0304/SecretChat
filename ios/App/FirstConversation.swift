@@ -28,6 +28,41 @@ struct SharedInvitation {
 
 enum InvitationPasteResult { case accepted, invalid, differentService }
 
+struct RegistrationServiceSettings: Equatable {
+    var server: String
+    var development = false
+
+    private static let preset = Self(
+        server: Bundle.main.object(forInfoDictionaryKey: "SecretChatServiceURL") as? String ?? "",
+        development: Bundle.main.object(forInfoDictionaryKey: "SecretChatUnverifiedRegistration") as? String == "YES"
+    )
+    private static let key = "registration.serviceOverride." + preset.server
+
+    private func normalized() throws -> Self {
+        let text = server.trimmingCharacters(in: .whitespacesAndNewlines)
+        if text.isEmpty { return Self(server: "", development: development) }
+        guard !text.contains(where: { $0.isWhitespace }), !text.hasPrefix("/") else { throw ClientError.invalidServer }
+        let address = text.contains(":/") ? text : "https://" + text
+        let url = try Service.validatedBase(address)
+        return Self(server: url.absoluteString, development: development)
+    }
+
+    static func load(from defaults: UserDefaults = .standard) -> Self {
+        guard let values = defaults.dictionary(forKey: key), let server = values["server"] as? String,
+              let development = values["development"] as? Bool else { return preset }
+        let saved = Self(server: server, development: development)
+        return (try? saved.normalized()) ?? preset
+    }
+
+    @discardableResult
+    func save(to defaults: UserDefaults = .standard) throws -> Self {
+        let value = try normalized()
+        if value == Self.preset { defaults.removeObject(forKey: Self.key) }
+        else { defaults.set(["server": value.server, "development": value.development], forKey: Self.key) }
+        return value
+    }
+}
+
 struct RegistrationDraft {
     var server: String { didSet { if server != oldValue { clearChallenge() } } }
     var email = "" { didSet { if email != oldValue { clearChallenge() } } }
@@ -37,8 +72,13 @@ struct RegistrationDraft {
     var code = ""
     private(set) var challenge: UUID?
 
-    init(server: String = Bundle.main.object(forInfoDictionaryKey: "SecretChatServiceURL") as? String ?? "") {
+    init(settings: RegistrationServiceSettings = .load()) {
+        self.init(server: settings.server, development: settings.development)
+    }
+
+    init(server: String, development: Bool = false) {
         self.server = server
+        self.development = development
     }
 
     var address: String { email.trimmingCharacters(in: .whitespacesAndNewlines) }

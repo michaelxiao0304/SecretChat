@@ -7,6 +7,59 @@ final class FirstConversationTests: XCTestCase {
     private let base = "https://service.test/secretchat"
     private let id = UUID()
 
+    func testNewInstallationUsesBundledRegistrationMode() throws {
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: UUID().uuidString))
+        var draft = RegistrationDraft(settings: .load(from: defaults))
+        #if DEBUG
+        XCTAssertEqual(draft.serviceRoot, "https://101.132.60.65/secretchat")
+        XCTAssertTrue(draft.development)
+        draft.email = "user@example.test"
+        XCTAssertFalse(draft.canRegister)
+        draft.invite = "single-use-invite"
+        XCTAssertTrue(draft.canRegister)
+        #else
+        XCTAssertFalse(draft.hasService)
+        XCTAssertFalse(draft.development)
+        #endif
+    }
+
+    func testManualServiceAndVerificationModeSurviveRelaunchWithoutCarryingRegistrationData() throws {
+        let suite = UUID().uuidString
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let preset = RegistrationServiceSettings.load(from: defaults)
+        let manual = RegistrationServiceSettings(server: base, development: false)
+        try manual.save(to: defaults)
+        XCTAssertThrowsError(try RegistrationServiceSettings(server: "http://invalid.test", development: true).save(to: defaults))
+
+        var draft = RegistrationDraft(settings: .load(from: defaults))
+        XCTAssertEqual(draft.serviceRoot, base)
+        XCTAssertFalse(draft.development)
+        draft.invite = "token"
+        draft.email = "user@example.test"
+        XCTAssertFalse(draft.canRegister)
+        try preset.save(to: defaults)
+        let restored = RegistrationDraft(settings: .load(from: defaults))
+        XCTAssertEqual(restored.server, preset.server)
+        XCTAssertEqual(restored.development, preset.development)
+        XCTAssertEqual(restored.email, "")
+        XCTAssertEqual(restored.invite, "")
+    }
+
+    func testSettingsAcceptPastedAddressAndExplainInvalidEditsWithoutReplacingSavedService() throws {
+        let suite = UUID().uuidString
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        for input in ["  service.test:8443/chat\n", " https://service.test:8443/chat "] {
+            try RegistrationServiceSettings(server: input, development: false).save(to: defaults)
+            XCTAssertEqual(RegistrationServiceSettings.load(from: defaults).server, "https://service.test:8443/chat")
+        }
+        for invalid in ["http://example.test", "https:/example.test", "bad host/chat", "https://user:pass@example.test"] {
+            XCTAssertThrowsError(try RegistrationServiceSettings(server: invalid).save(to: defaults))
+            XCTAssertEqual(RegistrationServiceSettings.load(from: defaults).server, "https://service.test:8443/chat")
+        }
+    }
+
     @MainActor
     func testSelectedArtworkIsAvailableToTheInstalledApplication() throws {
         let image = try XCTUnwrap(InvitationStyle.letter)

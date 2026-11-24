@@ -8,6 +8,8 @@
 	</array>
 	<key>SecretChatServiceURL</key>
 	<string>$(SECRETCHAT_SERVICE_URL)</string>
+	<key>SecretChatUnverifiedRegistration</key>
+	<string>$(SECRETCHAT_REGISTRATION_UNVERIFIED)</string>
 	<key>SecretChatGroup</key>
 	<string>$(SECRETCHAT_APP_GROUP)</string>
 </dict>
