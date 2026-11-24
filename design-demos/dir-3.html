@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>往来手记 · SecretChat 首次对话</title>
+<style>
+:root {
+  --ink:#24231f;
+  --paper:#fbf9f4;
+  --skin:#eeeae1;
+  --muted:#615e57;
+  --accent:#912937;
+  --line:#d7d1c6;
+  --green:#386345;
+  --screen-bg:#fbf9f4;
+  --serif:"Songti SC","STSong","Noto Serif CJK SC",Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"SFMono-Regular",Menlo,monospace;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--skin);
+  font: 16px/1.55 var(--sans);
+}
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: default;
+  opacity: .5;
+}
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #ac4b58;
+  outline-offset: 2px;
+}
+button {
+  border: 0;
+  background: none;
+}
+a {
+  color: inherit;
+}
+.board {
+  min-height: 100vh;
+  max-width: 1680px;
+  margin: auto;
+  padding: 0 clamp(24px, 5vw, 82px) 22px;
+  background-image:
+    radial-gradient(
+      ellipse at 79% 42%,
+      #fff9ec 0%,
+      transparent 46%);
+}
+.mast {
+  height: 63px;
+  border-bottom: 1px solid #aaa69b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  font: 600 24px/1.2 Georgia, serif;
+  letter-spacing: -1px;
+}
+.edition {
+  font-size: 14px;
+  color: var(--muted);
+}
+.edition strong {
+  font-family: var(--mono);
+  color: var(--accent);
+  margin-right: 7px;
+}
+.spread {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(385px, .65fr);
+  gap: 8%;
+  max-width: 1250px;
+  margin: 0 auto;
+  align-items: center;
+  min-height: calc(100vh - 89px);
+}
+.editor {
+  padding: 28px 0;
+  min-width: 0;
+}
+.folioTitle {
+  margin: 0;
+  font: 600 clamp(48px, 5.7vw, 86px)/1.18 var(--serif);
+  letter-spacing: .005em;
+}
+.intro {
+  margin: 12px 0 30px;
+  max-width: 34em;
+  font-size: 16px;
+  color: var(--muted);
+}
+.leaf {
+  position: relative;
+  background: #fffdf8;
+  border: 1px solid #d7d0c2;
+  border-left: 7px solid var(--accent);
+  box-shadow: 5px 6px 0 -2px #f5f1e8, 6px 7px 0 -2px #c7c0b3;
+  padding: 22px 30px 18px;
+  margin-bottom: 28px;
+}
+.leafhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 12px;
+  font-weight: 600;
+}
+.folioCode {
+  font: 14px var(--mono);
+  letter-spacing: .035em;
+  color: var(--muted);
+}
+.line {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 16px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--line);
+  align-items: baseline;
+}
+.line:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.line > span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.line p {
+  font: 600 clamp(21px, 2.1vw, 33px)/1.45 var(--serif);
+  margin: 0;
+}
+.line small {
+  color: var(--muted);
+  display: block;
+  font: 13px/1.5 var(--sans);
+  margin-top: 4px;
+}
+.line:last-child small {
+  color: var(--accent);
+}
+.lab {
+  border-top: 1px solid #aaa69b;
+  padding-top: 14px;
+}
+.lab strong {
+  font-size: 14px;
+  margin-right: 10px;
+}
+.lab span {
+  font-size: 13px;
+  color: var(--muted);
+}
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 12px 0 0;
+}
+.tabs button {
+  background: #f7f4ec;
+  border: 1px solid #c3bcb0;
+  padding: 8px 13px;
+  border-radius: 2px;
+  font-size: 14px;
+}
+.tabs button[aria-pressed=true] {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.phone-side {
+  display: flex;
+  justify-content: center;
+  padding: 18px 0;
+}
+.device {
+  line-height: 1;
+  display: flex;
+  justify-content: center;
+}
+.device [data-app-slot] {
+  height: 100%;
+  line-height: 1.5;
+}
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  height: 100%;
+  background: var(--paper);
+  font-size: 15px;
+}
+.bar {
+  flex-shrink: 0;
+  min-height: 42px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+.bar b {
+  font: 600 18px Georgia, serif;
+}
+.textbtn {
+  padding: 9px 3px;
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.page {
+  flex: 1;
+  overflow: auto;
+  padding: 22px 23px;
+  min-height: 0;
+}
+.page h2 {
+  font: 600 35px/1.25 var(--serif);
+  margin: 0 0 10px;
+}
+.page h3 {
+  font: 600 20px/1.4 var(--serif);
+  margin: 24px 0 10px;
+}
+.page p {
+  margin: 0 0 14px;
+}
+.sub,
+.foot,
+.aside {
+  color: var(--muted);
+  font-size: 14px;
+}
+.block {
+  padding: 10px 0 13px;
+  border-top: 1px solid var(--line);
+}
+.foot {
+  margin-top: 12px;
+}
+.full {
+  width: 100%;
+}
+.action,
+.quiet {
+  display: block;
+  width: 100%;
+  padding: 11px 14px;
+  font-weight: 600;
+  font-size: 15px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+}
+.action {
+  background: var(--accent);
+  color: white;
+}
+.quiet {
+  color: var(--accent);
+  margin-top: 9px;
+}
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  padding-top: 11px;
+}
+.label input,
+.compose input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #aca499;
+  border-radius: 0;
+  background: transparent;
+  padding: 8px 2px;
+  font-size: 16px;
+}
+.error {
+  color: #9a2731;
+  font-size: 14px;
+  min-height: 21px;
+  margin: 6px 0;
+}
+.page .setting {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 20px;
+}
+.setting summary {
+  cursor: pointer;
+}
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+}
+.switch input {
+  accent-color: var(--accent);
+  width: 19px;
+  height: 19px;
+}
+.sample {
+  font-size: 13px;
+  display: block;
+  color: var(--accent);
+  padding: 10px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.status {
+  font: 13px/1.55 var(--sans);
+  color: var(--muted);
+}
+.state-ok {
+  color: var(--green);
+}
+.state-wait {
+  color: var(--accent);
+}
+.index-head {
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 7px 0;
+  margin-top: 24px;
+  color: var(--muted);
+}
+.contact {
+  display: grid;
+  grid-template-columns: 42px 1fr 16px;
+  align-items: center;
+  gap: 11px;
+  text-align: left;
+  width: 100%;
+  border-bottom: 1px solid var(--line);
+  padding: 17px 0;
+}
+.contact > i {
+  font: 600 17px var(--mono);
+  color: var(--accent);
+  font-style: normal;
+  border: 1px solid #af9395;
+  border-left: 4px solid var(--accent);
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: #f6e8e6;
+}
+.contact b,
+.short {
+  font: 600 16px/1.55 var(--mono);
+}
+.contact small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+.idcard {
+  padding: 12px 0;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  margin: 16px 0;
+}
+.room {
+  padding: 18px 20px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.room .roomid {
+  margin: 0;
+  font: 600 28px/1.15 var(--mono);
+  letter-spacing: -1px;
+}
+.statusline {
+  color: var(--muted);
+  font-size: 13px;
+}
+.statusline span {
+  color: var(--accent);
+}
+.thread {
+  margin: 0;
+}
+.entry {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.entry header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.entry p {
+  font: 600 21px/1.5 var(--serif);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.entry[data-who=me] {
+  padding-left: 14px;
+  border-left: 3px solid #cbb9a3;
+}
+.entry[data-who=peer] {
+  padding-left: 14px;
+  border-left: 3px solid var(--ink);
+}
+.entry small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.cause {
+  border: 1px solid #bb9194;
+  border-left: 4px solid var(--accent);
+  background: #faefeb;
+  padding: 11px 13px;
+}
+.cause b {
+  color: var(--accent);
+  font-size: 15px;
+}
+.cause p {
+  margin: 3px 0;
+  font-size: 14px;
+}
+.compose {
+  display: flex;
+  align-items: end;
+  gap: 9px;
+  border-top: 1px solid var(--line);
+  padding: 10px 18px;
+  background: var(--paper);
+  flex-shrink: 0;
+}
+.compose input {
+  min-width: 0;
+}
+.compose button {
+  flex-shrink: 0;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 3px;
+  padding: 8px 11px;
+  font-size: 14px;
+}
+.pausedfoot {
+  padding: 11px 17px;
+  text-align: center;
+  color: var(--accent);
+  border-top: 1px solid #d4b6b5;
+  font-size: 14px;
+}
+.pin {
+  display: inline-block;
+  color: var(--accent);
+  font: bold 13px var(--sans);
+  margin-bottom: 4px;
+}
+.identity-link {
+  align-self: flex-start;
+}
+.msglist {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.empty-mark {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font: 600 44px var(--serif);
+  height: 88px;
+  margin: 18px 0 12px;
+  color: var(--accent);
+  border-block: 1px solid var(--line);
+  letter-spacing: 8px;
+}
+.note {
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  padding: 9px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.dev-back {
+  display: block;
+  margin: 9px auto 0;
+}
+.mobnav {
+  display: none;
+}
+@media (min-width: 901px) and (max-height: 810px) {
+  .device {
+    zoom: .86;
+  }
+  .editor {
+    padding: 15px 0;
+  }
+  .intro {
+    margin-bottom: 18px;
+  }
+  .leaf {
+    margin-bottom: 18px;
+  }
+  .line {
+    padding: 10px 0;
+  }
+  .spread {
+    min-height: calc(100vh - 75px);
+  }
+}
+@media (max-width: 1020px) {
+  .board {
+    padding-inline: 24px;
+  }
+  .spread {
+    gap: 28px;
+    grid-template-columns: minmax(0, 1fr) 380px;
+  }
+  .leaf {
+    padding-inline: 18px;
+  }
+  .line {
+    grid-template-columns: 32px 1fr;
+    gap: 8px;
+  }
+}
+@media (max-width: 800px) {
+  .board {
+    padding: 0;
+    background: none;
+  }
+  .mast {
+    height: 42px;
+    padding: 0 12px;
+  }
+  .brand {
+    font-size: 19px;
+  }
+  .edition {
+    font-size: 12px;
+  }
+  .spread {
+    display: block;
+    min-height: 0;
+  }
+  .editor {
+    padding: 0;
+  }
+  .editor h1,
+  .editor .intro,
+  .leaf,
+  .lab > div:first-child {
+    display: none;
+  }
+  .lab {
+    border: 0;
+    padding: 0;
+  }
+  .tabs {
+    flex-wrap: nowrap;
+    overflow: auto;
+    margin: 0;
+    gap: 4px;
+    padding: 6px 9px;
+  }
+  .tabs button {
+    white-space: nowrap;
+    font-size: 13px;
+    padding: 7px 9px;
+  }
+  .phone-side {
+    display: block;
+    padding: 0;
+  }
+  .device {
+    display: block;
+  }
+  .device > div {
+    display: block !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  .device > div > div {
+    width: 100% !important;
+    height: calc(100dvh - 88px) !important;
+    border-radius: 0 !important;
+    min-height: 330px;
+  }
+  .device > div > div > div:not(:has(> [data-app-slot])) {
+    display: none !important;
+  }
+  .device > div > div > div:has(> [data-app-slot]) {
+    inset: 0 !important;
+  }
+  .phone-side .page {
+    padding-bottom: 22px;
+  }
+  .page h2 {
+    font-size: 33px;
+  }
+  .lab .tabs button {
+    min-height: 39px;
+  }
+}
+.scenario {
+  margin: 16px 0 10px;
+  border-top: 1px dashed var(--rule);
+  padding-top: 8px;
+  color: #5c554a;
+  font:
+    13px -apple-system,
+    "PingFang SC",
+    sans-serif;
+}
+.scenario summary {
+  cursor: pointer;
+}
+.scenario > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.scenario button {
+  font: inherit;
+  padding: 9px 5px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.room .status {
+  margin-top: 6px;
+}
+.tabs button:focus-visible {
+  outline-offset: 1px;
+}
+</style></head><body>
+<main class="board">
+<header class="mast"><span class="brand">SecretChat</span><span class="edition"><strong>C</strong> 首次对话设计</span></header>
+<div class="spread"><section class="editor"><h1 class="folioTitle">往来手记</h1><p class="intro">按发言人读一段对话，沿每条消息的旁注查看投递进度。</p>
+<div class="leaf"><div class="leafhead"><span>示例会话摘录</span><span class="folioCode">7a31c8d2</span></div><div class="line"><span>我</span><div><p>周六还是十点见吗？</p><small>对方设备已收到</small></div></div><div class="line"><span>对方</span><div><p>十点，老地方见。</p></div></div><div class="line"><span>我</span><div><p>好，我会提前五分钟到。</p><small id="leaf-state">待提交 · 已保存在本机</small></div></div></div>
+<nav aria-label="演示场景" class="lab"><div><strong>切换演示场景</strong><span>测试数据，仅在本页生效</span></div><div class="tabs" id="tabs"></div></nav></section>
+<section class="phone-side" aria-label="可交互的 iPhone 原型"><div class="device"><div style="display:inline-block;padding:12px;background:#000;border-radius:60px;box-shadow:0 0 0 2px #1f2937, 0 20px 60px rgba(0,0,0,0.3);position:relative"><div style="position:relative;border-radius:48px;overflow:hidden;background:var(--screen-bg);width:363px;height:742px"><div data-lint-skip="" style="position:absolute;top:0;left:0;right:0;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 32px 0 32px;font-size:16px;font-weight:600;font-family:-apple-system, &quot;SF Pro Text&quot;, sans-serif;z-index:20;pointer-events:none;color:#000"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><div style="display:flex;align-items:flex-end;gap:2px;height:12px"><div style="width:3px;background:currentColor;border-radius:1px;height:4px"></div><div style="width:3px;background:currentColor;border-radius:1px;height:6px"></div><div style="width:3px;background:currentColor;border-radius:1px;height:9px"></div><div style="width:3px;background:currentColor;border-radius:1px;height:11px"></div></div><svg width="16" height="12" viewBox="0 0 16 12" fill="none" style="color:#000"><path d="M8 11.5a1 1 0 100-2 1 1 0 000 2z" fill="currentColor"></path><path d="M3 7.5a7 7 0 0110 0" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"></path><path d="M1 4.5a11 11 0 0114 0" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" opacity="0.7"></path></svg><div style="width:26px;height:12px;border:1.5px solid currentColor;border-radius:3px;padding:1px;position:relative;opacity:0.8"><div style="width:85%;height:100%;background:currentColor;border-radius:1px;opacity:0.9"></div><div style="position:absolute;top:3px;right:-3px;width:2px;height:6px;background:currentColor;border-radius:0 1px 1px 0"></div></div></div></div><div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:124px;height:36px;background:#000;border-radius:999px;z-index:30"></div><div style="position:absolute;top:54px;left:0;right:0;bottom:34px;overflow:auto"><div data-app-slot=""></div></div><div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:140px;height:5px;background:rgba(0,0,0,0.3);border-radius:999px;z-index:10"></div></div></div></div></section></div></main>
+<script>
+"use strict";
+const app = document.querySelector("[data-app-slot]"), tabs = document.querySelector("#tabs");
+const peer = "7a31c8d2", demoInvite = "M7KD-29QP", demoMail = "demo@example.test", demoCode = "246810";
+const presets = [["join", "受邀注册"], ["empty", "空联系人"], ["directory", "联系人"], ["pending", "离线待发"], ["accepted", "服务已收"], ["received", "设备已收"], ["paused", "身份变化"]];
+let screen = "chat", scene = "paused", contact = true, paused = true, stage = "pending", custom = [], draft = "", shared = false, reveal = false, issued = "", alertText = "", challenge = false;
+let fields = { email: "", invite: "", code: "", server: "https://demo.example.test/secretchat", dev: false }, returnTo = "directory", expandedSettings = false;
+const dialogue = ["周六还是十点见吗？", "十点，老地方见。", "好，我会提前五分钟到。"];
+let fresh = false, localOffline = false, localThread = [], expectInviter = false, invitationUsed = false;
+const labels = { pending: "待提交", accepted: "服务端已接收", received: "对方设备已收到" };
+const explain = { pending: "已保存在本机，联网后会尝试提交。", accepted: "服务端已接受密文，仍在等待对方设备确认。", received: "对方设备已确认收件，阅读情况未知。" };
+const esc = (x) => String(x).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
+function btn(act, label, c = "textbtn") {
+  return '<button type="button" data-act="' + act + '" class="' + c + '">' + label + "</button>";
+}
+function sample() {
+  return btn("sample", "填入演示数据", "sample");
+}
+function appBar(left, right) {
+  return '<header class="bar">' + left + right + "</header>";
+}
+function setScene(key) {
+  if (key === "paused" && screen === "chat") {
+    paused = true;
+    scene = "paused";
+    alertText = "";
+    draw();
+    return;
+  }
+  fresh = ["join", "empty"].includes(key);
+  if (fresh) {
+    localThread = [];
+    localOffline = false;
+    expectInviter = false;
+    invitationUsed = false;
+  }
+  scene = key;
+  alertText = "";
+  shared = false;
+  issued = "";
+  reveal = false;
+  if (["join", "empty", "directory"].includes(key)) custom = [];
+  draft = "";
+  expandedSettings = false;
+  paused = key === "paused";
+  stage = ["accepted", "received"].includes(key) ? key : "pending";
+  if (key === "join") {
+    screen = "register";
+    fields = { ...fields, email: "", invite: "", code: "" };
+    challenge = false;
+  } else if (key === "empty" || key === "directory") {
+    screen = "directory";
+    contact = key === "directory";
+  } else {
+    screen = "chat";
+    contact = true;
+  }
+  draw();
+}
+function show(v) {
+  screen = v;
+  alertText = "";
+  draw();
+}
+function codeSettings() {
+  return '<details class="setting" ' + (expandedSettings ? "open" : "") + '><summary>开发联调</summary><label class="label">HTTPS 服务根地址<input type="url" data-field="server" value="' + esc(fields.server) + '"></label><label class="switch"><input data-field="dev" type="checkbox" ' + (fields.dev ? "checked" : "") + ">免验证码联调</label><p>仅用于已开启免验证码注册的测试服务。</p></details>";
+}
+function validServer() {
+  try {
+    const u = new URL(fields.server);
+    return u.protocol === "https:" && !!u.host && !u.username && !u.password && !u.search && !u.hash;
+  } catch {
+    return false;
+  }
+}
+function validEmail() {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email);
+}
+function register() {
+  return appBar("<b>SecretChat</b>", '<span class="status">受邀注册</span>') + '<section class="page"><h2>接受邀请</h2><p class="sub">用邮箱和一次性邀请码建立你的设备账号。</p><form id="reg" novalidate><label class="label">一次性邀请码<input data-field="invite" placeholder="输入对方分享的码" value="' + esc(fields.invite) + '"></label><label class="label">邮箱<input data-field="email" type="email" placeholder="name@example.com" value="' + esc(fields.email) + '"></label>' + (!fields.dev ? challenge ? '<label class="label">邮箱验证码<input data-field="code" inputmode="numeric" maxlength="6" placeholder="六位数字" value="' + esc(fields.code) + '"></label><div class="status">演示验证码 246810</div>' : btn("challenge", "获取邮箱验证码", "quiet") : "") + sample() + '<div class="error" role="status">' + esc(alertText) + '</div><button class="action" type="submit">注册并打开联系人</button></form>' + codeSettings() + "</section>";
+}
+function directory() {
+  return appBar("<b>SecretChat</b>", btn("dev", "开发联调")) + '<section class="page"><h2>联系人</h2><div class="index-head"><span>联系人索引</span><span>' + Number(contact) + " 位联系人</span></div>" + (contact ? '<button class="contact" data-act="chat"><i aria-hidden="true">7a</i><span><b>' + peer + "</b><small>" + (paused ? "设备身份已变化" : "身份未核验") + '</small></span><span aria-hidden="true">›</span></button>' : '<div class="empty-mark" aria-hidden="true">「　」</div><h3>第一位联系人</h3><p class="sub">已凭对方邀请注册？刷新联系人。你也可以生成单次邀请码，邀请朋友加入。</p>') + btn("refresh", "刷新联系人", "quiet") + btn("issue", "生成单次邀请码", "quiet") + (issued ? '<div class="idcard"><div class="status">可分享的一次性邀请码</div><b class="short">' + issued + "</b>" + (invitationUsed ? '<p class="status">此邀请码已使用。</p>' : btn("copy", shared ? "已复制" : "复制邀请码") + '<div class="scenario">' + btn("consume", "模拟对方用此码完成注册") + "</div>") + "</div>" : "") + '<div class="status" role="status">' + esc(alertText) + "</div></section>";
+}
+function item(who, t, s) {
+  return '<li class="entry" data-who="' + who + '"><header><span>' + { me: "我", peer: "对方" }[who] + "</span>" + (s ? "<small>" + labels[s] + "</small>" : "") + "</header><p>" + esc(t) + "</p></li>";
+}
+function demoTools() {
+  if (!fresh || paused) return "";
+  const last = localThread.at(-1);
+  let actions = btn("network", localOffline ? "模拟恢复在线" : "模拟本机离线");
+  if (!last || last.who === "peer") actions += btn("fill", "填入示例消息");
+  else if (!localOffline && last.status === "pending") actions += btn("accept", "模拟服务端接收");
+  else if (!localOffline && last.status === "accepted") actions += btn("reply", localThread.length === 1 ? "模拟对方设备收件并回复" : "模拟对方设备收件");
+  return '<details class="scenario" open><summary>演示操作</summary><div>' + actions + "</div></details>";
+}
+function chat() {
+  const cause = '<div class="cause"><b>设备身份已变化</b><p>本次目录记录与本机保存的设备身份不一致。新消息与待发重试均已暂停。</p>' + btn("identity", "查看身份说明") + "</div>";
+  return appBar(btn("back-list", "‹ 联系人"), btn("identity", "身份信息")) + '<section class="page room"><div><span class="pin">与联系人往来</span><h2 class="roomid">' + peer + '</h2><div class="statusline">' + (paused ? "发送已暂停" : "身份未核验") + "</div></div>" + (paused ? cause : "") + '<ol class="thread msglist">' + (fresh ? localThread.map((m) => item(m.who, m.body, m.status)).join("") : item("me", dialogue[0], "received") + item("peer", dialogue[1]) + item("me", dialogue[2], stage) + custom.map((m) => item("me", m, stage)).join("")) + "</ol>" + (fresh ? (!localThread.length ? '<div class="aside">写下第一句话。首次建立会话时，这台设备需要在线获取对方的预密钥。</div>' : "") + demoTools() + '<div class="status" role="status">' + esc(alertText) + "</div>" : !paused ? '<div class="aside"><b>' + labels[stage] + "</b>　" + explain[stage] + "</div>" : "") + "</section>" + (paused ? '<div class="pausedfoot">发送与重试已暂停</div>' : '<form class="compose" id="send"><input aria-label="文字消息" data-field="draft" placeholder="写消息" value="' + esc(draft) + '"><button>发送</button></form>');
+}
+function draw() {
+  tabs.innerHTML = presets.map(([k, n]) => '<button type="button" aria-pressed="' + (scene === k) + '" data-scene="' + k + '">' + n + "</button>").join("");
+  const sampleStage = fresh && localThread.length >= 3 ? localThread[2].status : stage;
+  document.querySelector("#leaf-state").textContent = labels[sampleStage] + (sampleStage === "pending" ? paused ? " · 因设备身份变化已暂停重试" : " · 已保存在本机" : "");
+  let html = "";
+  if (screen === "register") html = register();
+  if (screen === "directory") html = directory();
+  if (screen === "chat") html = chat();
+  if (screen === "identity") html = appBar(btn("back-chat", "‹ 对话"), "<b>SecretChat</b>") + '<section class="page"><h2>设备身份</h2><div class="idcard"><div class="status">联系人短号</div><b class="short">' + peer + "</b></div>" + (paused ? '<h3>发送已暂停</h3><p>联系人目录返回的设备标识或身份公钥，与本机保存的绑定不同。</p><p class="sub">请先通过双方已信任的其他渠道确认是否更换设备。当前版本会保留历史消息，并继续暂停新发和重试。</p>' : '<h3>身份未核验</h3><p class="sub">短号帮助你找到这段对话。首次建立的本机绑定用于识别后续设备变化。</p>') + btn("back-chat", "返回对话", "quiet") + "</section>";
+  if (screen === "dev") html = appBar(btn("back-list", "‹ 联系人"), "<b>SecretChat</b>") + '<section class="page"><h2>开发联调</h2><p class="sub">服务与注册设置只作用于此离线演示。</p>' + codeSettings() + btn("save-dev", "保存设置", "quiet") + '<p class="error">' + esc(alertText) + "</p></section>";
+  app.innerHTML = '<div class="app">' + html + "</div>";
+}
+function issue(v) {
+  alertText = v;
+  draw();
+}
+tabs.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-scene]");
+  if (b) setScene(b.dataset.scene);
+});
+app.addEventListener("input", (e) => {
+  const k = e.target.dataset.field;
+  if (!k) return;
+  if (k === "draft") {
+    draft = e.target.value;
+    return;
+  }
+  if (k === "dev") {
+    fields.dev = e.target.checked;
+    expandedSettings = true;
+    challenge = false;
+    draw();
+    return;
+  }
+  fields[k] = e.target.value;
+  if ((k === "email" || k === "server") && challenge) {
+    challenge = false;
+    fields.code = "";
+  }
+});
+app.addEventListener("toggle", (e) => {
+  if (e.target.tagName === "DETAILS") expandedSettings = e.target.open;
+}, true);
+app.addEventListener("click", async (e) => {
+  const k = e.target.closest("[data-act]")?.dataset.act;
+  if (!k) return;
+  if (k === "sample") {
+    fields.email = demoMail;
+    fields.invite = demoInvite;
+    fields.code = demoCode;
+    challenge = true;
+    issue("演示资料已填入。");
+  }
+  if (k === "challenge") {
+    if (!validEmail()) return issue("请先填写有效邮箱。");
+    if (!validServer()) return issue("请在开发联调中填写有效的 HTTPS 地址。");
+    challenge = true;
+    issue("本页模拟验证码邮件。");
+  }
+  if (k === "dev") {
+    expandedSettings = true;
+    show("dev");
+  }
+  if (k === "save-dev") {
+    if (!validServer()) return issue("请填写有效的 HTTPS 地址。");
+    scene = contact ? "directory" : "empty";
+    show("directory");
+  }
+  if (k === "back-list") {
+    scene = contact ? "directory" : "empty";
+    show("directory");
+  }
+  if (k === "consume" && issued && !invitationUsed) {
+    invitationUsed = true;
+    issue("对方已在演示中注册。刷新联系人即可查看。");
+  }
+  if (k === "refresh") {
+    if (!contact && !expectInviter && !invitationUsed) return issue("列表仍为空。可以生成邀请码，再请朋友凭码注册。");
+    contact = true;
+    scene = "directory";
+    issue("目录已同步。");
+  }
+  if (k === "issue") {
+    issued = issued || "Q8RL-6PZT";
+    issue("可将邀请码发给准备注册的朋友。");
+  }
+  if (k === "copy") {
+    try {
+      await navigator.clipboard.writeText(issued);
+      shared = true;
+      issue("邀请码已复制。");
+    } catch {
+      issue("请选中上方邀请码并复制。");
+    }
+  }
+  if (k === "chat" || k === "back-chat") {
+    scene = paused ? "paused" : stage;
+    show("chat");
+  }
+  if (k === "fill") {
+    draft = dialogue[localThread.length === 0 ? 0 : 2];
+    draw();
+    app.querySelector("[data-field=draft]")?.focus();
+  }
+  if (k === "network") {
+    localOffline = !localOffline;
+    issue(localOffline ? "演示设备已离线。" : "演示设备已恢复在线。");
+  }
+  if (k === "accept" && !localOffline && localThread.length) {
+    localThread.at(-1).status = "accepted";
+    issue("服务端已接收密文。");
+  }
+  if (k === "reply" && !localOffline && localThread.length) {
+    localThread.at(-1).status = "received";
+    if (localThread.length === 1) localThread.push({ who: "peer", body: dialogue[1] });
+    issue("对方设备已确认收件，阅读情况未知。");
+  }
+  if (k === "identity") show("identity");
+});
+app.addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (e.target.id === "send") {
+    if (!paused && draft.trim()) {
+      if (fresh && localOffline && !localThread.length) return issue("首次建立会话需要在线获取对方预密钥，草稿已保留。");
+      if (fresh) {
+        localThread.push({ who: "me", body: draft.trim(), status: "pending" });
+        alertText = localOffline ? "已保存在本机，联网后会尝试提交。" : "消息已进入本机待提交队列。";
+      } else custom.push(draft.trim());
+      draft = "";
+      draw();
+      const p = app.querySelector(".page");
+      p.scrollTop = p.scrollHeight;
+    }
+    return;
+  }
+  if (!validServer()) return issue("请在开发联调中填写有效 HTTPS 服务地址。");
+  if (fields.invite.trim() !== demoInvite) return issue("本演示使用邀请码 M7KD-29QP。");
+  if (!validEmail()) return issue("请填写有效邮箱。");
+  if (!fields.dev && (!challenge || fields.code !== demoCode)) return issue("请先获取并填写演示验证码 246810。");
+  setScene("empty");
+  expectInviter = true;
+});
+draw();
+</script></body></html>
