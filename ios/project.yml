@@ -1,0 +1,71 @@
+name: SecretChat
+options:
+  deploymentTarget:
+    iOS: "17.0"
+packages:
+  LibSignal:
+    url: https://github.com/signalapp/libsignal
+    exactVersion: 0.108.6
+  SignalBinary:
+    path: SignalBinary
+settings:
+  base:
+    SWIFT_VERSION: 5.0
+    TARGETED_DEVICE_FAMILY: 1
+    CURRENT_PROJECT_VERSION: 1
+    MARKETING_VERSION: 0.1
+    GENERATE_INFOPLIST_FILE: YES
+    CODE_SIGN_STYLE: Automatic
+    SECRETCHAT_APP_GROUP: group.chat.secretchat.prototype
+targetTemplates:
+  Client:
+    platform: iOS
+    dependencies:
+      - package: LibSignal
+        product: LibSignalClient
+      - package: SignalBinary
+    sources: [Shared]
+targets:
+  SecretChat:
+    templates: [Client]
+    type: application
+    sources: [App]
+    dependencies:
+      - target: NotificationService
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: chat.secretchat.prototype
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_CFBundleDisplayName: SecretChat
+        INFOPLIST_FILE: App/Info.plist
+        CODE_SIGN_ENTITLEMENTS: App/App.entitlements
+  NotificationService:
+    templates: [Client]
+    type: app-extension
+    sources: [Notification]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: chat.secretchat.prototype.NotificationService
+        INFOPLIST_FILE: Notification/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Notification/Notification.entitlements
+        SKIP_INSTALL: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
+  SecretChatTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    dependencies:
+      - target: SecretChat
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: chat.secretchat.prototype.tests
+schemes:
+  SecretChat:
+    build:
+      targets:
+        SecretChat: all
+    test:
+      gatherCoverageData: true
+      coverageTargets: [SecretChat, NotificationService]
+      targets: [SecretChatTests]
