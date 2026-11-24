@@ -101,6 +101,16 @@ final class DeviceModel: ObservableObject {
         Diagnostics.event(.protocolState, "prekeys.replenished", .ok, count: keys.count)
     }
 
+    func requestCode(server: String, email: String) async throws -> UUID {
+        try await Diagnostics.span(.account, "registration.challenge") {
+            try await makeService(server, nil).challenge(email: email)
+        }
+    }
+
+    func issueInvite() async throws -> String {
+        try await Diagnostics.span(.account, "invite.issue") { try await service().invite() }
+    }
+
     func register(server: String, email: String, invite: String, challenge: UUID?, code: String) async throws {
         guard var next = profile, next.account == nil else { throw ClientError.unavailableStorage }
         let api = try makeService(server, nil)
@@ -114,6 +124,11 @@ final class DeviceModel: ObservableObject {
 
     func send(_ text: String, to peer: Contact) async throws {
         guard var next = profile else { throw ClientError.missingAccount }
+        let access = next.access(forSending: peer)
+        guard access == .available else {
+            Diagnostics.event(.mailbox, "outbox.restricted", .skip, reason: access.diagnosticReason)
+            throw access
+        }
         let bundle = next.crypto.hasSession(with: peer.id) ? nil : try await service().bundle(for: peer)
         _ = try next.queue(text, for: peer, bundle: bundle, now: milliseconds())
         try save(next)

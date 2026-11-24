@@ -89,6 +89,64 @@ final class DeviceFlowTests: XCTestCase {
         XCTAssertEqual(try vault.load()?.settings.showBody, true)
     }
 
+    func testInvitationAndEmailChallengeUseAuthenticatedAndAnonymousRoutesWithSafeLogs() async throws {
+        let vault = try Vault(directory: root, key: SymmetricKey(size: .bits256))
+        let challenge = UUID(), secret = "caseSensitive-testToken", email = "private@example.test"
+        var requests: [URLRequest] = []
+        let model = DeviceModel(openVault: { vault }, makeService: { base, token in
+            try Service(base: base, token: token) { request in
+                requests.append(request)
+                if request.url?.path == "/secretchat/api/challenges" {
+                    return try httpReply(200, JSONEncoder().encode(["challengeId": challenge.wire]))
+                }
+                return try httpReply(200, JSONEncoder().encode(["code": secret]))
+            }
+        })
+        model.open()
+        var events: [DiagnosticRecord] = []
+        try await Diagnostics.$observer.withValue({ events.append($0) }) {
+            let returned = try await model.requestCode(server: host, email: email)
+            XCTAssertEqual(returned, challenge)
+            var profile = try XCTUnwrap(model.profile)
+            profile.account = Account(accountId: UUID(), deviceId: UUID(), token: "device-test")
+            profile.server = URL(string: host)
+            try model.save(profile)
+            let issued = try await model.issueInvite()
+            XCTAssertEqual(issued, secret)
+        }
+        XCTAssertEqual(requests.map { $0.url?.path }, ["/secretchat/api/challenges", "/secretchat/api/invites"])
+        XCTAssertNil(requests[0].value(forHTTPHeaderField: "Authorization"))
+        XCTAssertEqual(requests[1].value(forHTTPHeaderField: "Authorization"), "Bearer device-test")
+        for stage in ["registration.challenge", "invite.issue"] {
+            XCTAssertTrue(events.contains { $0.stage.description == stage && $0.phase == .ok })
+        }
+        let rendered = events.map(\.line).joined()
+        for privateValue in [email, host, secret, challenge.wire, "device-test"] {
+            XCTAssertFalse(rendered.contains(privateValue))
+        }
+    }
+
+    func testRemovedContactStopsFirstSendBeforeFetchingPrekeys() async throws {
+        let vault = try Vault(directory: root, key: SymmetricKey(size: .bits256))
+        var requests = 0
+        let model = DeviceModel(openVault: { vault }, makeService: { base, token in
+            try Service(base: base, token: token) { _ in
+                requests += 1
+                throw URLError(.notConnectedToInternet)
+            }
+        })
+        model.open()
+        var profile = try XCTUnwrap(model.profile)
+        profile.account = Account(accountId: UUID(), deviceId: UUID(), token: "local-test")
+        profile.server = URL(string: "https://example.test")
+        try model.save(profile)
+        let removed = Contact(accountId: UUID(), deviceId: UUID(), identityKey: Data([7]), blocked: false)
+        await model.perform { try await model.send("草稿", to: removed) }
+        XCTAssertEqual(requests, 0)
+        XCTAssertEqual(model.issue, ContactAccess.missing.explanation)
+        XCTAssertTrue(try XCTUnwrap(model.profile).outbox.isEmpty)
+    }
+
     func testUnavailableVaultCanBeRetriedWithoutReplacingIdentity() throws {
         let vault = try Vault(directory: root, key: SymmetricKey(size: .bits256))
         var available = false

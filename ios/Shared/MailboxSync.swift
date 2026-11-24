@@ -49,8 +49,9 @@ struct MailboxSync {
 
     private func submit(from state: inout Profile, persist: (Profile) throws -> Void) async throws {
         for item in state.outbox {
-            guard state.canRetry(item) else {
-                Diagnostics.event(.mailbox, "outbox.paused", .skip, reason: .ineligible)
+            let access = state.retryAccess(for: item)
+            guard access == .available else {
+                Diagnostics.event(.mailbox, "outbox.paused", .skip, reason: access.diagnosticReason)
                 continue
             }
             do {

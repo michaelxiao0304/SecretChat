@@ -37,6 +37,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: chat.secretchat.prototype
+        SECRETCHAT_SERVICE_URL: ""
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_CFBundleDisplayName: SecretChat
@@ -63,6 +64,17 @@ targets:
       base:
         TARGETED_DEVICE_FAMILY: "1"
         PRODUCT_BUNDLE_IDENTIFIER: chat.secretchat.prototype.tests
+  SecretChatUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: SecretChat
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "1"
+        PRODUCT_BUNDLE_IDENTIFIER: chat.secretchat.prototype.ui-tests
+        TEST_TARGET_NAME: SecretChat
 schemes:
   SecretChat:
     build:
@@ -71,4 +83,4 @@ schemes:
     test:
       gatherCoverageData: true
       coverageTargets: [SecretChat, NotificationService]
-      targets: [SecretChatTests]
+      targets: [SecretChatTests, SecretChatUITests]

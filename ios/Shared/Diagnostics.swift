@@ -9,7 +9,7 @@ enum DiagnosticPhase: String { case begin, ok, failed, skip, retry, fallback }
 enum DiagnosticReason: String {
     case http, network, cancelled, decoding, file, crypto, invalidData, identityChanged
     case unavailable, ineligible, timeout, duplicate, unknown
-    case unknownSender, blocked, deviceChanged, expired
+    case unknownSender, missingContact, blocked, deviceChanged, expired
 }
 
 // Only stage literals, local trace IDs, closed enums and numbers can reach the log sink.
@@ -67,6 +67,7 @@ enum Diagnostics {
         case is DecodingError: reason = .decoding
         case let failure as CocoaError: reason = .file; code = failure.errorCode
         case is SignalError, is CryptoKitError: reason = .crypto
+        case let restriction as ContactAccess: reason = restriction.diagnosticReason ?? .ineligible
         case ClientError.changedContact: reason = .identityChanged
         case ClientError.unavailableStorage, ClientError.missingAccount: reason = .unavailable
         case is ClientError: reason = .invalidData

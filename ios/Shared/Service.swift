@@ -52,14 +52,18 @@ struct Service {
     private let exchange: Exchange
 
     init(base: String, token: String? = nil, exchange: Exchange? = nil) throws {
-        guard let url = URL(string: base), url.scheme?.lowercased() == "https",
-              let host = url.host, !host.isEmpty, url.user == nil, url.password == nil,
-              url.query == nil, url.fragment == nil else { throw ClientError.invalidServer }
-        self.base = url
+        self.base = try Self.validatedBase(base)
         self.token = token
         self.exchange = exchange ?? { request in
             try await Self.session.data(for: request)
         }
+    }
+
+    static func validatedBase(_ base: String) throws -> URL {
+        guard let url = URL(string: base), url.scheme?.lowercased() == "https",
+              let host = url.host, !host.isEmpty, url.user == nil, url.password == nil,
+              url.query == nil, url.fragment == nil else { throw ClientError.invalidServer }
+        return url
     }
 
     private func makeRequest(_ path: String, method: String = "GET", query: [URLQueryItem] = [],

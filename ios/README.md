@@ -17,13 +17,21 @@ xcrun xcresulttool get test-results summary --path /tmp/SecretChatTests.xcresult
 xcrun xccov view --report /tmp/SecretChatTests.xcresult
 ```
 
-重复运行时选择新的结果包路径。测试使用两套独立生成的 libsignal 身份和真实的 Swift/FFI 绑定。通过可注入的 HTTP 交换与独立临时加密库复现离线、断点和错误响应。
+重复运行时选择新的结果包路径。首次启动的界面测试需使用尚未注册账号的测试模拟器。测试使用两套独立生成的 libsignal 身份和真实的 Swift/FFI 绑定。通过可注入的 HTTP 交换与独立临时加密库复现离线、断点和错误响应。
+
+## 方向 A · 一张邀请
+
+打开邀请首页后，可以粘贴完整邀请，或展开后手工填写单次邀请码。完整邀请同时携带 HTTPS 服务地址和大小写敏感的凭据。邮箱验证前会显示目标服务。仅有邀请码时，可通过 Xcode 构建设置 `SECRETCHAT_SERVICE_URL` 为安装包预设地址；未预设时，表单也可以填写邀请人提供的服务地址。地址或邮箱变化后需重新获取验证码。工具栏「开发联调」保留地址配置和测试服务的免验证码开关。
+
+已注册设备可以在联系人页签发、查看、分享邀请；刚受邀注册的用户可刷新找邀请人。会话中的文字回执可点开查看依据。蓝色虚线气泡表示消息保存在本机待提交。服务端接受与设备收件分别显示；设备确认无法判断阅读情况。对方设备标识或身份公钥变化后，会话保留既有回执，并解释新发与待发重试暂停的原因。
+
+[选定原型](../design-demos/dir-1.html) · [原生界面](../design-demos/native-a/overview.jpg)
 
 ## 两台设备联调
 
 1. 提供实现目录和信箱接口的开发服务。客户端对齐 `codex/service-console-foundation` 的目录和信箱协议，已核对至 `08b6832`。输入证书受设备信任的 HTTPS 服务根地址，保留部署前缀，例如 `https://<开发域名>/secretchat`。同一地址的 `/ws` 需要支持 WSS。
 2. 在 Xcode 给主应用和通知扩展选择开发团队，配置团队拥有的两个 bundle ID、同一个 App Group（项目设置 `SECRETCHAT_APP_GROUP`），并为主应用启用开发环境 Push Notifications。服务端的 APNs topic 应与主应用 bundle ID 一致。
-3. 在服务控制台领取首账号邀请码，在第一台 iPhone 填写邮箱并完成注册。只有服务已开启免验证码联调模式时才打开相应开关。第一台设备生成单次邀请，第二台用它注册。双方回到前台或下拉刷新即可打开对话。
+3. 在服务控制台领取首账号邀请码，在第一台 iPhone 填写邮箱并完成注册。只有服务已开启免验证码联调模式时才打开相应开关。第一台设备生成并分享单次邀请，第二台在首页粘贴完整邀请后注册。双方回到前台或下拉刷新即可打开对话。
 4. 两台各发送一条文字，观察发送状态。接收端离线时再发送，重新打开后核对消息和状态。设备首次解锁后，允许通知并测试锁屏、后台、强制退出以及拒绝通知权限。记录实际推送延迟和失败时的固定文案。
 
 ## 端侧状态与协议
@@ -48,6 +56,8 @@ xcrun simctl spawn <设备ID> log show --last 10m --info --predicate 'subsystem 
 | 症状 | 先查的分类和事件 |
 |---|---|
 | 打不开本机数据 | `lifecycle/app.open`、`storage/keychain.read`、`keychain.create`、`vault.commit` |
+| 获取验证码或签发邀请失败 | `account/registration.challenge`、`account/invite.issue`，结合相同 trace 的 HTTP 状态与 requestId |
+| 对话提示身份变化或联系受限 | `mailbox/conversation.paused`、`outbox.restricted`、`outbox.paused` 的 reason 区分 identityChanged、blocked、missingContact |
 | 注册或首次建会话失败 | `network` 中的邮箱挑战、注册或预密钥请求，随后看 `protocolState/prekeys.replenished`、`lifecycle/device.operation` 的失败原因 |
 | 发送停在待提交 | `mailbox/outbox.committed` 后的 `outbox.paused`、`outbox.conflict` 或提交请求的状态码 |
 | 重连后缺消息或无法解密 | `network/socket.listen`、`socket.reconnect`、`mailbox/inbox.page`、`inbox.committed`、`inbox.discard`、`protocolState/inbox.decrypt` 和 ACK 请求 |
@@ -68,3 +78,10 @@ xcrun simctl spawn <设备ID> log show --last 10m --info --predicate 'subsystem 
 5. 使用 XCTest 和 Xcode 行覆盖报告进行验证。`ub-mode` 列出的三个工具当前支持的语言未包含 Swift。变异检查使用临时源码副本，在相同模拟器上运行对应的 XCTest。[Crapper 支持范围](https://github.com/unclebob/crapper) · [Dryer 支持范围](https://github.com/unclebob/dryer) · [Mutator 支持范围](https://github.com/unclebob/mutator)
 6. 对齐服务端 `X-Request-ID` 并验证响应头白名单。最终在 iPhone 18 Pro 模拟器（iOS 27.2）运行 37 个 XCTest，全部通过，跳过 0 个。主应用行覆盖率为 69.9%，会话适配文件为 100%，设备状态文件为 97.2%。三个定向变异分别被消息 ID 校验、到期边界和通知隐私用例捕获。
 7. 使用 iPhoneOS SDK 构建 Release，检查主程序与内嵌扩展均为 arm64，最终产物设备族为 iPhone。该检查使用未签名构建，真实 APNs 投递仍需按联调步骤验收。
+
+### 首次对话改版验收
+
+1. 按方向 A 复用原型的信封原画，接入真实邮箱挑战、注册和签发邀请接口。新邀请同时携带服务地址与单次凭据，保留原有纯码入口。
+2. 先在模拟器复现目录已移除联系人时仍有一次预密钥请求，再把权限检查移到发起请求之前。首次发送与重试复用同一份身份绑定，日志记录暂停原因。
+3. 在 iPhone 18 Pro、iOS 27.2 上运行 47 个单元测试与 1 个原生界面测试，48 个全部通过，跳过 0 个。独立源码副本中移除跨服务约束、混淆服务端与设备回执后，两条对应 XCTest 均失败。邀请首页和注册页留存正式 App 的测试截图。
+4. 用 iPhoneOS SDK 完成 Release 归档，确认主应用和通知扩展均为 arm64。此次归档关闭代码签名；真机安装、真实邮箱及两台设备投递需配置开发签名与联调服务。

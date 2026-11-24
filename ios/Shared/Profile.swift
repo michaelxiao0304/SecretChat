@@ -7,6 +7,10 @@ struct Account: Codable {
     let token: String
 }
 
+enum ContactAccess: Error {
+    case available, blocked, identityChanged, missing
+}
+
 struct Contact: Codable, Identifiable, Equatable {
     let accountId: UUID
     let deviceId: UUID
@@ -72,23 +76,38 @@ struct Profile: Codable {
 
     init() throws { crypto = try ClientState() }
 
-    func allows(_ peer: Contact) -> Bool {
-        !peer.blocked && matchesBinding(peer)
+    func access(to peer: Contact?) -> ContactAccess {
+        guard let peer else { return .missing }
+        guard !peer.blocked else { return .blocked }
+        return matchesBinding(peer) ? .available : .identityChanged
     }
+
+    func access(forSending selected: Contact) -> ContactAccess {
+        let current = contacts.first { $0.id == selected.id }
+        let permission = access(to: current)
+        guard permission == .available else { return permission }
+        return current == selected ? .available : .identityChanged
+    }
+
+    func allows(_ peer: Contact) -> Bool { access(to: peer) == .available }
 
     private func matchesBinding(_ peer: Contact) -> Bool {
         let key = crypto.peerIdentity(peer.id)
         return (key == nil || key == peer.identityKey) && (devices[peer.id] == nil || devices[peer.id] == peer.deviceId)
     }
 
-    func canRetry(_ outgoing: Outgoing) -> Bool {
-        guard let peer = contacts.first(where: { $0.id == outgoing.recipientAccountId }) else { return false }
-        return allows(peer) && peer.deviceId == outgoing.recipientDeviceId
+    func retryAccess(for outgoing: Outgoing) -> ContactAccess {
+        let peer = contacts.first { $0.id == outgoing.recipientAccountId }
+        let permission = access(to: peer)
+        guard permission == .available else { return permission }
+        return peer?.deviceId == outgoing.recipientDeviceId ? .available : .identityChanged
     }
+
+    func canRetry(_ outgoing: Outgoing) -> Bool { retryAccess(for: outgoing) == .available }
 
     mutating func queue(_ text: String, for peer: Contact, bundle: PublicBundle?, now: Int64) throws -> Outgoing {
         guard let account else { throw ClientError.missingAccount }
-        guard contacts.contains(peer), allows(peer), bundle == nil || bundle?.identity == peer.identityKey else {
+        guard access(forSending: peer) == .available, bundle == nil || bundle?.identity == peer.identityKey else {
             throw ClientError.changedContact
         }
         let packet = try crypto.prepare(text, from: account.accountId, to: peer.id, bundle: bundle)
@@ -154,3 +173,14 @@ struct Profile: Codable {
 }
 
 func milliseconds(_ date: Date = Date()) -> Int64 { Int64(date.timeIntervalSince1970 * 1000) }
+
+extension ContactAccess {
+    var diagnosticReason: DiagnosticReason? {
+        switch self {
+        case .available: return nil
+        case .identityChanged: return .identityChanged
+        case .blocked: return .blocked
+        case .missing: return .missingContact
+        }
+    }
+}
