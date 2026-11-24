@@ -72,6 +72,8 @@ flowchart LR
 
 客户端只做 iOS 和 Android，不考虑 PC 端。
 
+服务端和运营控制台已实现本地登录及队列概览。JDK 17 可直接构建包含控制台的服务端 JAR。[本地启动、MySQL 配置与测试](service/README.md)
+
 普通消息的明文、身份私钥和棘轮状态只存在于端侧。双棘轮按消息派生密钥，删除旧密钥后，当前状态无法解开整段历史。控制台的内容审核入口只接收用户为某次举报主动提交的副本；副本在客户端用运营公钥加密，服务端只保存密文，审核人员在本机解密查看。管理员没有导入会话密钥、回放私聊或逐条浏览密文的接口。[Signal 双棘轮规范](https://signal.org/docs/specifications/doubleratchet/)
 
 下表给出内测拟采用的保留期限。对外发布前按实际云配置、第三方服务和目标地区校准，并核实删除与恢复行为。
@@ -130,7 +132,7 @@ SecretChat 拟使用独立的 `/secretchat/` 公网前缀。未来仅为此前�
 |---|---|
 | `/secretchat/api/…` | 转发到 SecretChat 服务的 `/api/…`，保留查询参数。 |
 | `/secretchat/ws` | 转发到同一服务的 `/ws`，上游使用 HTTP/1.1 并传递 WebSocket 升级头。 |
-| `/secretchat/console/` | 由 Nginx 提供控制台静态文件；前端资源和页面路由均使用此前缀，入口限制管理员访问。 |
+| `/secretchat/console/…` | 转发到同一服务的 `/console/…`；Spring Boot 提供控制台资源，Spring Security 保护登录后的页面。 |
 | `/secretchat/admin-api/…` | 转发到 SecretChat 服务的 `/admin-api/…`，管理 API 逐请求校验管理员权限。 |
 
 Spring Boot 拟监听 `127.0.0.1:8080`，此次 TCP 监听快照未见 8080 被占用，部署时须复核。拟在 Supervisor 下新增独立程序 `secretchat-service`，以独立服务账号运行；应用监听端口与 Nginx 上游保持一致。部署后验证新进程、本机 API、公网 HTTPS 和 WSS，并复测原 demo 的 `/login`。
