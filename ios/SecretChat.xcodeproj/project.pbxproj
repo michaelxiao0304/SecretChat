@@ -12,6 +12,7 @@
 		1D12338FCB07F3273B338B97 /* MailboxSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47594C0514339E7FA1A5EDBA /* MailboxSync.swift */; };
 		1D19EAD50BFCB3D8CE334867 /* ConversationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 948583E06E3524A6540D29A8 /* ConversationTests.swift */; };
 		211268C0F5C96153E6268082 /* Vault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4563C9249BACED8AD5D95C0B /* Vault.swift */; };
+		2DD4CDFC69326D15D1DAFA16 /* Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB18358975C8CBE207DFA162 /* Diagnostics.swift */; };
 		2E74567D1AC8E9D814944EC0 /* MailboxSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47594C0514339E7FA1A5EDBA /* MailboxSync.swift */; };
 		56BF210601832DDCC5B5BCCD /* LibSignalClient in Frameworks */ = {isa = PBXBuildFile; productRef = 7CB284A38B882D097324032E /* LibSignalClient */; };
 		58E30AE8851C29B14AB3D695 /* SyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B73517BEE43A4397B804820 /* SyncTests.swift */; };
@@ -27,6 +28,9 @@
 		A4664EA7ABA08C08F2F5FCDD /* NotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 894C0A289692CF35B29E81CE /* NotificationTests.swift */; };
 		A4D0D30C928E95D304200C2F /* SecretChatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DA5719C3A7BA30F24E6937A /* SecretChatApp.swift */; };
 		ACF21B83F364FE3AF2FD4F40 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1367F02C2B19567E33D82FB /* NotificationService.swift */; };
+		B9ABE5F306CDFBD2B28A1E92 /* Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB18358975C8CBE207DFA162 /* Diagnostics.swift */; };
+		BC0BF8910078AC904E4122BA /* DiagnosticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26FA3BFF51D11B9DC3EB266 /* DiagnosticsTests.swift */; };
+		D1B6B627EBD72BF737B78963 /* DeviceFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA8B37A01AB45E10F2F48D76 /* DeviceFlowTests.swift */; };
 		E2BDBB10170C5AD4419EA2F0 /* MailboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BA7FC4A6CF19D2A85DED40 /* MailboxTests.swift */; };
 		EC9EFEB914C6587B169A60CF /* SignalConversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1D396BF49413BE3688313FF /* SignalConversation.swift */; };
 		EDD45871AADE06F3DA1A1CBB /* DeviceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A20554C7115CD8D219ED921 /* DeviceModel.swift */; };
@@ -83,11 +87,14 @@
 		894C0A289692CF35B29E81CE /* NotificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationTests.swift; sourceTree = "<group>"; };
 		948583E06E3524A6540D29A8 /* ConversationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationTests.swift; sourceTree = "<group>"; };
 		B1D396BF49413BE3688313FF /* SignalConversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalConversation.swift; sourceTree = "<group>"; };
+		BA8B37A01AB45E10F2F48D76 /* DeviceFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceFlowTests.swift; sourceTree = "<group>"; };
 		C80D36F17DA60DEA378C0139 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D1367F02C2B19567E33D82FB /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		D26FA3BFF51D11B9DC3EB266 /* DiagnosticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsTests.swift; sourceTree = "<group>"; };
 		D33C8A71179A5518C3C1A768 /* VaultTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultTests.swift; sourceTree = "<group>"; };
 		DC8893B09CF93213B469DE9C /* SecretChat.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SecretChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF32EBE027BB2202D42F35F9 /* SignalBinary */ = {isa = PBXFileReference; lastKnownFileType = folder; name = SignalBinary; path = SignalBinary; sourceTree = SOURCE_ROOT; };
+		EB18358975C8CBE207DFA162 /* Diagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagnostics.swift; sourceTree = "<group>"; };
 		EFCE5DA2655E4CB06F005B29 /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 		F08A8E0B94492A6176937F8A /* ServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -128,6 +135,8 @@
 			isa = PBXGroup;
 			children = (
 				948583E06E3524A6540D29A8 /* ConversationTests.swift */,
+				BA8B37A01AB45E10F2F48D76 /* DeviceFlowTests.swift */,
+				D26FA3BFF51D11B9DC3EB266 /* DiagnosticsTests.swift */,
 				31BA7FC4A6CF19D2A85DED40 /* MailboxTests.swift */,
 				894C0A289692CF35B29E81CE /* NotificationTests.swift */,
 				F08A8E0B94492A6176937F8A /* ServiceTests.swift */,
@@ -181,6 +190,7 @@
 		F67B0A91FCEC14DDD7392733 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				EB18358975C8CBE207DFA162 /* Diagnostics.swift */,
 				47594C0514339E7FA1A5EDBA /* MailboxSync.swift */,
 				48167FD573C190377000A533 /* NotificationPreview.swift */,
 				EFCE5DA2655E4CB06F005B29 /* Profile.swift */,
@@ -305,6 +315,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D19EAD50BFCB3D8CE334867 /* ConversationTests.swift in Sources */,
+				D1B6B627EBD72BF737B78963 /* DeviceFlowTests.swift in Sources */,
+				BC0BF8910078AC904E4122BA /* DiagnosticsTests.swift in Sources */,
 				E2BDBB10170C5AD4419EA2F0 /* MailboxTests.swift in Sources */,
 				A4664EA7ABA08C08F2F5FCDD /* NotificationTests.swift in Sources */,
 				F9F20C8FC6A3813927C33AED /* ServiceTests.swift in Sources */,
@@ -318,6 +330,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EDD45871AADE06F3DA1A1CBB /* DeviceModel.swift in Sources */,
+				2DD4CDFC69326D15D1DAFA16 /* Diagnostics.swift in Sources */,
 				2E74567D1AC8E9D814944EC0 /* MailboxSync.swift in Sources */,
 				980BCD1F30C99475120D96AF /* NotificationPreview.swift in Sources */,
 				7570E86AF5482544688890EA /* Profile.swift in Sources */,
@@ -332,6 +345,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9ABE5F306CDFBD2B28A1E92 /* Diagnostics.swift in Sources */,
 				1D12338FCB07F3273B338B97 /* MailboxSync.swift in Sources */,
 				FF278FEFFF7F16476B7A08E3 /* NotificationPreview.swift in Sources */,
 				ACF21B83F364FE3AF2FD4F40 /* NotificationService.swift in Sources */,

@@ -72,15 +72,18 @@ final class MailboxTests: XCTestCase {
     func testExpiredBlockedAndUnknownSendersLeaveOnlyAck() throws {
         var profile = try Profile()
         profile.account = bob
-        let letter = Incoming(sequence: 1, reference: UUID(), messageId: UUID(), senderAccountId: alice.accountId,
-                              senderDeviceId: alice.deviceId, expiresAtMs: 20, ciphertext: Data([0]))
-        profile.consume(letter, now: 0)
+        func envelope() -> Incoming {
+            Incoming(sequence: 1, reference: UUID(), messageId: UUID(), senderAccountId: alice.accountId,
+                     senderDeviceId: alice.deviceId, expiresAtMs: 20, ciphertext: Data([0]))
+        }
+        let unknown = envelope(), blocked = envelope(), expired = envelope()
+        profile.consume(unknown, now: 0)
         profile.contacts = [Contact(accountId: alice.accountId, deviceId: alice.deviceId, identityKey: Data(), blocked: true)]
-        profile.consume(letter, now: 1)
+        profile.consume(blocked, now: 1)
         profile.contacts[0].blocked = false
-        profile.consume(letter, now: 20)
-        XCTAssertNil(try profile.notificationText(for: letter, now: 20))
-        XCTAssertEqual(profile.acks, [letter.reference])
+        profile.consume(expired, now: 20)
+        XCTAssertNil(try profile.notificationText(for: envelope(), now: 20))
+        XCTAssertEqual(profile.acks, [unknown.reference, blocked.reference, expired.reference])
         XCTAssertTrue(profile.messages.isEmpty)
     }
 
@@ -94,5 +97,24 @@ final class MailboxTests: XCTestCase {
         profile.consume(letter, now: 2)
         XCTAssertEqual(profile.messages.map(\.status), [.unreadable])
         XCTAssertNil(profile.messages.first?.text)
+    }
+}
+
+extension MailboxTests {
+    func testFirstDecryptionMustMatchDirectoryIdentityBeforePreviewOrStore() throws {
+        var sender = try ClientState(), receiver = try Profile()
+        receiver.account = bob
+        let packet = try sender.prepare("identity mismatch", from: alice.accountId, to: bob.accountId,
+                                        bundle: receiver.crypto.publicBundle())
+        let letter = Incoming(sequence: 1, reference: UUID(), messageId: packet.id, senderAccountId: alice.accountId,
+                              senderDeviceId: alice.deviceId, expiresAtMs: 200, ciphertext: packet.ciphertext)
+        receiver.contacts = [Contact(accountId: alice.accountId, deviceId: alice.deviceId,
+                                     identityKey: try ClientState().publicBundle().identity, blocked: false)]
+        XCTAssertThrowsError(try receiver.notificationText(for: letter, now: 1))
+        receiver.consume(letter, now: 1)
+        XCTAssertFalse(receiver.crypto.hasSession(with: alice.accountId))
+        XCTAssertEqual(receiver.messages.map(\.status), [.unreadable])
+        XCTAssertNil(receiver.messages.first?.text)
+        XCTAssertEqual(receiver.acks, [letter.reference])
     }
 }

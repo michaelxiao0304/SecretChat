@@ -67,3 +67,36 @@ final class ServiceTests: XCTestCase {
         }
     }
 }
+
+extension ServiceTests {
+    func testChallengeInviteAndNoContentResponsesMatchServer() async throws {
+        let id = UUID()
+        let api = try Service(base: "https://service.test") { request in
+            switch request.url?.path {
+            case "/api/challenges":
+                let body = try JSONDecoder().decode([String:String].self, from: XCTUnwrap(request.httpBody))
+                XCTAssertEqual(body, ["purpose":"register","email":"me@test.invalid"])
+                return (200, try JSONSerialization.data(withJSONObject: ["challengeId":id.wire]))
+            case "/api/invites": return (200, Data(#"{"code":"single-use"}"#.utf8))
+            default: XCTFail(); return (500, Data())
+            }
+        }
+        let challenge = try await api.challenge(email: "me@test.invalid")
+        let invite = try await api.invite()
+        XCTAssertEqual(challenge, id)
+        XCTAssertEqual(invite, "single-use")
+    }
+
+    func testMismatchedReceiptEnvelopeAndOutcomeAreRejected() async throws {
+        let id = UUID(), other = UUID(), device = UUID()
+        let input = Outgoing(recipientAccountId: other, recipientDeviceId: device, messageId: id, expiresAtMs: 22, ciphertext: Data([1]))
+        let api = try Service(base: "https://service.test") { request in
+            let body: [String:Any] = ["reference":other.wire,"expiresAtMs":44,"status":"received","sequence":2,
+                "messageId":id.wire,"senderAccountId":other.wire,"senderDeviceId":device.wire,"ciphertext":"AQ=="]
+            return (request.httpMethod == "POST" ? 202 : 200, try JSONSerialization.data(withJSONObject: body))
+        }
+        do { _ = try await api.submit(input); XCTFail() } catch ClientError.invalidEnvelope {}
+        do { _ = try await api.envelope(id); XCTFail() } catch ClientError.invalidEnvelope {}
+        do { _ = try await api.outcome(id); XCTFail() } catch ClientError.invalidEnvelope {}
+    }
+}

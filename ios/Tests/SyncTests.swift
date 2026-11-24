@@ -63,3 +63,82 @@ final class SyncTests: XCTestCase {
         XCTAssertTrue(ackResults.isEmpty)
     }
 }
+
+extension SyncTests {
+    func testSnapshotRequestsFixedThroughAndPublishesOnlyAfterLastPage() async throws {
+        var state = try Profile()
+        state.account = account
+        var afters: [String] = [], commits: [Int64] = []
+        let ref = UUID()
+        let service = try Service(base: "https://test.invalid") { request in
+            let url = try XCTUnwrap(request.url)
+            if url.path == "/api/contacts" { return (200, Data("[]".utf8)) }
+            if url.path.hasSuffix("/ack") {
+                XCTAssertEqual(commits.first, 6)
+                return (410, Data())
+            }
+            let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+            let query = Dictionary(uniqueKeysWithValues: items.map { ($0.name, $0.value ?? "") })
+            afters.append(query["after"] ?? "")
+            if query["after"] == "0" {
+                XCTAssertNil(query["through"])
+                let envelope: [String:Any] = ["reference":ref.wire,"messageId":UUID().wire,"senderAccountId":UUID().wire,
+                    "senderDeviceId":UUID().wire,"expiresAtMs":1234,"sequence":3,"ciphertext":"AQ=="]
+                return (200, try JSONSerialization.data(withJSONObject: ["through":6,"nextAfter":3,"done":false,"envelopes":[envelope]]))
+            }
+            XCTAssertEqual(query["through"], "6")
+            return (200, Data(#"{"through":6,"nextAfter":6,"done":true,"envelopes":[]}"#.utf8))
+        }
+        try await MailboxSync(service: service).run(from: state) { next in
+            commits.append(next.cursor)
+            state = next
+        }
+        XCTAssertEqual(afters, ["0","3"])
+        XCTAssertEqual(commits, [6,6])
+        XCTAssertTrue(state.acks.isEmpty)
+    }
+}
+
+extension SyncTests {
+    func testConflictPreservesCiphertextAndExpiredSubmissionHasNoFalseReceipt() async throws {
+        var initial = try Profile()
+        initial.account = account
+        let remote = try ClientState().publicBundle()
+        let peer = Contact(accountId: UUID(), deviceId: UUID(), identityKey: remote.identity, blocked: false)
+        initial.contacts = [peer]
+        let queued = try initial.queue("waiting", for: peer, bundle: remote, now: 0)
+        for status in [409, 400] {
+            var saved = initial
+            let service = try Service(base: "https://service.test") { request in
+                if request.url?.path == "/api/contacts" { return (200, try JSONEncoder().encode([peer])) }
+                if request.httpMethod == "POST" { return (status, Data()) }
+                return (200, Data(#"{"through":0,"nextAfter":0,"done":true,"envelopes":[]}"#.utf8))
+            }
+            try await MailboxSync(service: service).run(from: saved) { saved = $0 }
+            XCTAssertEqual(saved.outbox, status == 409 ? [queued] : [])
+            XCTAssertEqual(saved.messages.first?.status, status == 409 ? .pending : .unconfirmed)
+            XCTAssertNil(saved.messages.first?.reference)
+        }
+    }
+
+    func testExpiredOutcomeAndPurgedReceiptHaveDistinctStates() async throws {
+        var state = try Profile()
+        state.account = account
+        let expired = UUID(), gone = UUID()
+        state.messages = [expired, gone].map {
+            ChatMessage(id: UUID(), peer: UUID(), outgoing: true, text: "test", status: .accepted, reference: $0)
+        }
+        let api = try Service(base: "https://test.invalid") { request in
+            switch request.url?.path {
+            case "/api/contacts": return (200, Data("[]".utf8))
+            case "/api/mailbox/envelopes": return (200, Data(#"{"through":0,"nextAfter":0,"done":true,"envelopes":[]}"#.utf8))
+            case "/api/mailbox/outcomes/" + gone.wire: return (404, Data())
+            case "/api/mailbox/outcomes/" + expired.wire:
+                return (200, try JSONSerialization.data(withJSONObject: ["reference":expired.wire,"status":"expired"]))
+            default: XCTFail(); return (500, Data())
+            }
+        }
+        try await MailboxSync(service: api).run(from: state) { state = $0 }
+        XCTAssertEqual(state.messages.map(\.status), [.expired, .unconfirmed])
+    }
+}

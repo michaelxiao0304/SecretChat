@@ -18,13 +18,22 @@ struct Vault {
         self.key = key
     }
 
+    private init(file: URL, key: SymmetricKey) {
+        self.file = file
+        self.key = key
+    }
+
     static func shared(createKey: Bool) throws -> Vault {
         guard let group = Bundle.main.object(forInfoDictionaryKey: "SecretChatGroup") as? String,
               let container = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group) else {
             throw ClientError.unavailableStorage
         }
-        return try Vault(directory: container.appending(path: "Device", directoryHint: .isDirectory),
-                         key: deviceKey(group: group, create: createKey))
+        let directory = container.appending(path: "Device", directoryHint: .isDirectory)
+        let file = directory.appending(path: "device.sealed")
+        let mayCreate = createKey && !FileManager.default.fileExists(atPath: file.path)
+        let key = try deviceKey(group: group, create: mayCreate)
+        if createKey { return try Vault(directory: directory, key: key) }
+        return Vault(file: file, key: key)
     }
 
     private static func deviceKey(group: String, create: Bool) throws -> SymmetricKey {
@@ -38,15 +47,21 @@ struct Vault {
         if status == errSecSuccess, let data = result as? Data, data.count == 32 {
             return SymmetricKey(data: data)
         }
-        guard status == errSecItemNotFound, create else { throw ClientError.unavailableStorage }
+        guard status == errSecItemNotFound, create else {
+            Diagnostics.event(.storage, "keychain.read", .failed, reason: .unavailable, code: Int(status))
+            throw ClientError.unavailableStorage
+        }
         let key = SymmetricKey(size: .bits256)
         var item = query
         item[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
         item[kSecValueData as String] = key.withUnsafeBytes { Data($0) }
-        switch SecItemAdd(item as CFDictionary, nil) {
+        let added = SecItemAdd(item as CFDictionary, nil)
+        switch added {
         case errSecSuccess: return key
         case errSecDuplicateItem: return try deviceKey(group: group, create: false)
-        default: throw ClientError.unavailableStorage
+        default:
+            Diagnostics.event(.storage, "keychain.create", .failed, reason: .unavailable, code: Int(added))
+            throw ClientError.unavailableStorage
         }
     }
 
@@ -59,6 +74,13 @@ struct Vault {
     }
 
     func save(_ profile: Profile) throws {
+        do { try write(profile) } catch {
+            Diagnostics.failure(.storage, "vault.commit", error)
+            throw error
+        }
+    }
+
+    private func write(_ profile: Profile) throws {
         let sealed = try AES.GCM.seal(JSONEncoder().encode(profile), using: key)
         guard let data = sealed.combined else { throw ClientError.unavailableStorage }
         try data.write(to: file, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])

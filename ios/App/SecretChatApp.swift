@@ -7,12 +7,20 @@ struct SecretChatApp: App {
     @UIApplicationDelegateAdaptor(PushDelegate.self) private var push
     @StateObject private var model = DeviceModel()
     @Environment(\.scenePhase) private var phase
+    @Environment(\.isSceneCaptured) private var captured
 
     var body: some Scene {
         WindowGroup {
             RootScreen(model: model)
-                .overlay { if phase != .active { Color(uiColor: .systemBackground).ignoresSafeArea() } }
+                .overlay { if phase != .active || captured { Color(uiColor: .systemBackground).ignoresSafeArea() } }
                 .task { model.open() }
+                .onChange(of: phase) {
+                    switch phase {
+                    case .active: Diagnostics.event(.lifecycle, "scene.foreground", .ok)
+                    case .background: Diagnostics.event(.lifecycle, "scene.background", .ok)
+                    default: break
+                    }
+                }
                 .task(id: phase == .active ? model.profile?.account?.deviceId : nil) {
                     guard phase == .active, model.profile?.account != nil else { return }
                     if await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .authorized {
@@ -118,6 +126,7 @@ private struct ContactsScreen: View {
                 Button("启用新消息通知") {
                     Task { await model.perform {
                         let allowed = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
+                        Diagnostics.event(.push, "apns.permission", allowed ? .ok : .skip)
                         if allowed { UIApplication.shared.registerForRemoteNotifications() }
                         notificationNote = allowed ? "已允许通知" : "通知权限已关闭，可在系统设置中更改。"
                     } }

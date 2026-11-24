@@ -108,10 +108,16 @@ struct Profile: Codable {
     }
 
     private func sender(of envelope: Incoming, now: Int64) -> Contact? {
-        guard envelope.expiresAtMs > now,
-              let contact = contacts.first(where: { $0.id == envelope.senderAccountId }),
-              contact.deviceId == envelope.senderDeviceId, allows(contact) else { return nil }
-        return contact
+        func discard(_ reason: DiagnosticReason) -> Contact? {
+            Diagnostics.event(.mailbox, "inbox.discard", .skip, reason: reason)
+            return nil
+        }
+        guard envelope.expiresAtMs > now else { return discard(.expired) }
+        guard let peer = contacts.first(where: { $0.id == envelope.senderAccountId }) else { return discard(.unknownSender) }
+        guard !peer.blocked else { return discard(.blocked) }
+        guard peer.deviceId == envelope.senderDeviceId else { return discard(.deviceChanged) }
+        guard matchesBinding(peer) else { return discard(.identityChanged) }
+        return peer
     }
 
     private func opened(_ envelope: Incoming, from peer: Contact) throws -> (ClientState, String)? {
@@ -129,7 +135,11 @@ struct Profile: Codable {
     }
 
     mutating func consume(_ envelope: Incoming, now: Int64) {
-        guard acks.insert(envelope.reference).inserted, let peer = sender(of: envelope, now: now) else { return }
+        guard acks.insert(envelope.reference).inserted else {
+            Diagnostics.event(.mailbox, "inbox.replay", .skip, reason: .duplicate)
+            return
+        }
+        guard let peer = sender(of: envelope, now: now) else { return }
         guard !messages.contains(where: { !$0.outgoing && $0.peer == peer.id && $0.id == envelope.messageId }) else { return }
         do {
             guard let (newState, text) = try opened(envelope, from: peer) else { return }
@@ -137,6 +147,7 @@ struct Profile: Codable {
             devices[peer.id] = peer.deviceId
             messages.append(ChatMessage(id: envelope.messageId, peer: peer.id, outgoing: false, text: text, status: .received))
         } catch {
+            Diagnostics.failure(.protocolState, "inbox.decrypt", error)
             messages.append(ChatMessage(id: envelope.messageId, peer: peer.id, outgoing: false, text: nil, status: .unreadable))
         }
     }

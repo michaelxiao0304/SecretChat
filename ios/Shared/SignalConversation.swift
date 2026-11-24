@@ -37,14 +37,34 @@ struct PublicPrekey: Codable {
     var signature: Data
 }
 
+struct OneTimePrekey: Codable, Equatable {
+    let id: UInt32
+    let material: Data
+}
+
+private struct PrekeyPool: Codable {
+    var lastID: UInt32 = 0
+    var records: [UInt32: Data] = [:]
+    var pending: [OneTimePrekey] = []
+}
+
 struct PublicBundle {
     let registrationId: UInt32
     let identity: Data
     var signed: PublicPrekey
     let kyber: PublicPrekey
 
+    var oneTime: OneTimePrekey?
+
     func signalBundle() throws -> PreKeyBundle {
-        try PreKeyBundle(registrationId: registrationId, deviceId: 1,
+        if let oneTime {
+            return try PreKeyBundle(registrationId: registrationId, deviceId: 1,
+                prekeyId: oneTime.id, prekey: PublicKey(oneTime.material),
+                signedPrekeyId: signed.id, signedPrekey: PublicKey(signed.key), signedPrekeySignature: signed.signature,
+                identity: IdentityKey(bytes: identity), kyberPrekeyId: kyber.id, kyberPrekey: KEMPublicKey(kyber.key),
+                kyberPrekeySignature: kyber.signature)
+        }
+        return try PreKeyBundle(registrationId: registrationId, deviceId: 1,
                          signedPrekeyId: signed.id, signedPrekey: PublicKey(signed.key),
                          signedPrekeySignature: signed.signature, identity: IdentityKey(bytes: identity),
                          kyberPrekeyId: kyber.id, kyberPrekey: KEMPublicKey(kyber.key),
@@ -67,7 +87,17 @@ private struct TextContent: Codable {
 
 // A call works on detached records. Only an authenticated result can publish its new state.
 private final class WorkingStore: InMemorySignalProtocolStore {
+    var records: [UInt32: Data] = [:]
     var usedBaseKeys: Set<Data> = []
+
+    override func loadPreKey(id: UInt32, context: StoreContext) throws -> PreKeyRecord {
+        guard let bytes = records[id] else { throw SignalError.invalidKeyIdentifier("prekey unavailable") }
+        return try PreKeyRecord(bytes: bytes)
+    }
+
+    override func removePreKey(id: UInt32, context: StoreContext) throws {
+        records.removeValue(forKey: id)
+    }
 
     override func markKyberPreKeyUsed(id: UInt32, signedPreKeyId: UInt32, baseKey: PublicKey,
                                       context: StoreContext) throws {
@@ -78,6 +108,7 @@ private final class WorkingStore: InMemorySignalProtocolStore {
 }
 
 struct ClientState: Codable {
+    private var pool: PrekeyPool?
     private let identity: Data
     private let registration: UInt32
     private let signedRecord: Data
@@ -99,6 +130,25 @@ struct ClientState: Codable {
         kyberRecord = try KyberPreKeyRecord(id: 1, timestamp: now, keyPair: kem,
             signature: pair.privateKey.generateSignature(message: kem.publicKey.serialize())).serialize()
     }
+
+    var pendingPrekeys: [OneTimePrekey] { pool?.pending ?? [] }
+
+    mutating func preparePrekeys() throws -> [OneTimePrekey] {
+        if !pendingPrekeys.isEmpty { return pendingPrekeys }
+        var batch = pool ?? PrekeyPool()
+        guard batch.lastID < UInt32.max - 16 else { throw ClientError.unavailableStorage }
+        for _ in 0..<16 {
+            batch.lastID += 1
+            let key = PrivateKey.generate()
+            let record = try PreKeyRecord(id: batch.lastID, privateKey: key)
+            batch.records[batch.lastID] = record.serialize()
+            batch.pending.append(OneTimePrekey(id: batch.lastID, material: key.publicKey.serialize()))
+        }
+        pool = batch
+        return batch.pending
+    }
+
+    mutating func didUploadPrekeys() { pool?.pending.removeAll() }
 
     func publicBundle() throws -> PublicBundle {
         let ec = try SignedPreKeyRecord(bytes: signedRecord)
@@ -125,6 +175,7 @@ struct ClientState: Codable {
         let kyber = try KyberPreKeyRecord(bytes: kyberRecord)
         try store.storeSignedPreKey(signed, id: signed.id, context: context)
         try store.storeKyberPreKey(kyber, id: kyber.id, context: context)
+        store.records = pool?.records ?? [:]
         store.usedBaseKeys = usedBaseKeys
         return store
     }
@@ -136,6 +187,7 @@ struct ClientState: Codable {
         guard let session, let identity else { throw ClientError.missingSession }
         sessions[peer] = session
         identities[peer] = identity
+        pool?.records = store.records
         usedBaseKeys = store.usedBaseKeys
     }
 
@@ -169,11 +221,6 @@ struct ClientState: Codable {
         try commit(store, peer: peer)
         received[peer, default: []].insert(packet.id)
         return message.text
-    }
-
-    func preview(_ packet: Packet, from peer: UUID, to me: UUID) throws -> String? {
-        var copy = self
-        return try copy.receive(packet, from: peer, to: me)
     }
 
     private func decrypt(_ bytes: Data, using store: WorkingStore, peer: UUID, me: UUID) throws -> Data {

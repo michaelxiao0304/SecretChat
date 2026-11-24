@@ -24,3 +24,19 @@ final class VaultTests: XCTestCase {
         XCTAssertThrowsError(try reopened.load())
     }
 }
+
+extension VaultTests {
+    func testSharedReadOnlyVaultReopensAppIdentityAndDirectoryIsExcludedFromBackup() throws {
+        // The host app opens its own device state at launch. Opening the extension's read path
+        // must use the same app group and device-only key without replacing the existing bytes.
+        let writer = try Vault.shared(createKey: true)
+        if try writer.load() == nil { try writer.save(Profile()) }
+        let original = try Data(contentsOf: writer.file)
+        let reader = try Vault.shared(createKey: false)
+        XCTAssertEqual(try reader.load()?.crypto.publicBundle().identity, try writer.load()?.crypto.publicBundle().identity)
+        XCTAssertEqual(try Data(contentsOf: reader.file), original)
+        let directory = reader.file.deletingLastPathComponent()
+        let flags = try directory.resourceValues(forKeys: [.isExcludedFromBackupKey])
+        XCTAssertEqual(flags.isExcludedFromBackup, true)
+    }
+}

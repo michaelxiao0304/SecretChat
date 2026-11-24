@@ -27,14 +27,7 @@ final class ConversationTests: XCTestCase {
         XCTAssertNil(try receiver.receive(second, from: alice, to: bob))
     }
 
-    func testPreviewReadsSnapshotWithoutConsumingRatchet() throws {
-        var sender = try ClientState()
-        var receiver = try ClientState()
-        let message = try sender.prepare("private", from: alice, to: bob, bundle: receiver.publicBundle())
-        XCTAssertEqual(try receiver.preview(message, from: alice, to: bob), "private")
-        XCTAssertEqual(try receiver.preview(message, from: alice, to: bob), "private")
-        XCTAssertEqual(try receiver.receive(message, from: alice, to: bob), "private")
-    }
+
 }
 
 extension ConversationTests {
@@ -69,5 +62,30 @@ extension ConversationTests {
         bundle.signed.signature[0] ^= 1
         XCTAssertThrowsError(try sender.prepare("hello", from: alice, to: bob, bundle: bundle))
         XCTAssertFalse(sender.hasSession(with: bob))
+    }
+}
+
+extension ConversationTests {
+    func testOneTimeKeyBatchIsDurableUntilUploadAndConsumedOnlyByApp() throws {
+        var recipient = try ClientState()
+        let beforeUpload = try recipient.preparePrekeys()
+        XCTAssertEqual(beforeUpload.count, 16)
+        recipient = try JSONDecoder().decode(ClientState.self, from: JSONEncoder().encode(recipient))
+        XCTAssertEqual(try recipient.preparePrekeys(), beforeUpload)
+        recipient.didUploadPrekeys()
+        XCTAssertTrue(recipient.pendingPrekeys.isEmpty)
+        var sender = try ClientState()
+        var bundle = try recipient.publicBundle()
+        bundle.oneTime = beforeUpload[0]
+        let envelope = try sender.prepare("one time", from: alice, to: bob, bundle: bundle)
+        var snapshot = recipient
+        XCTAssertEqual(try snapshot.receive(envelope, from: alice, to: bob), "one time")
+        XCTAssertEqual(try recipient.receive(envelope, from: alice, to: bob), "one time")
+        let next = try recipient.preparePrekeys()
+        XCTAssertTrue(Set(next.map(\.id)).isDisjoint(with: beforeUpload.map(\.id)))
+        var impostor = try ClientState()
+        let third = UUID()
+        let reuse = try impostor.prepare("reused", from: third, to: bob, bundle: bundle)
+        XCTAssertThrowsError(try recipient.receive(reuse, from: third, to: bob))
     }
 }

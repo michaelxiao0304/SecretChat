@@ -75,10 +75,13 @@ struct Service {
     }
 
     private func data(_ path: String, method: String = "GET", query: [URLQueryItem] = [], body: Data? = nil,
-                      status: Int = 200) async throws -> Data {
-        let (received, data) = try await exchange(makeRequest(path, method: method, query: query, body: body))
-        guard received == status else { throw Failure(status: received) }
-        return data
+                      status: Int = 200, operation: StaticString = #function) async throws -> Data {
+        try await Diagnostics.span(.network, operation) {
+            let (received, data) = try await exchange(makeRequest(path, method: method, query: query, body: body))
+            guard received == status else { throw Failure(status: received) }
+            Diagnostics.event(.network, "http.response", .ok, code: received)
+            return data
+        }
     }
 
     func challenge(email: String) async throws -> UUID {
@@ -121,6 +124,7 @@ struct Service {
             let deviceId: UUID
             let identityKey: Data
             let signedPrekey: Data
+            let oneTimePrekey: OneTimePrekey?
             let protocolPrekeys: Data
         }
         let bytes = try await data("api/contacts/\(peer.id.wire)/prekeys", method: "POST")
@@ -130,7 +134,18 @@ struct Service {
         }
         let extra = try JSONDecoder().decode(ProtocolKeys.self, from: reply.protocolPrekeys)
         return try PublicBundle(registrationId: extra.registrationId, identity: reply.identityKey,
-            signed: JSONDecoder().decode(PublicPrekey.self, from: reply.signedPrekey), kyber: extra.kyber)
+            signed: JSONDecoder().decode(PublicPrekey.self, from: reply.signedPrekey), kyber: extra.kyber, oneTime: reply.oneTimePrekey)
+    }
+
+    private struct PrekeyCount: Decodable { let remaining: UInt32 }
+
+    func remainingPrekeys() async throws -> UInt32 {
+        try await JSONDecoder().decode(PrekeyCount.self, from: data("api/keys/one-time")).remaining
+    }
+
+    func upload(prekeys: [OneTimePrekey]) async throws {
+        let bytes = try await data("api/keys/one-time", method: "POST", body: JSONEncoder().encode(["keys":prekeys]))
+        _ = try JSONDecoder().decode(PrekeyCount.self, from: bytes)
     }
 
     func submit(_ packet: Outgoing) async throws -> UUID {
@@ -180,6 +195,7 @@ struct Service {
         var upgrade = request
         upgrade.url = parts.url
         let socket = Self.session.webSocketTask(with: upgrade)
+        Diagnostics.event(.network, "socket.connect", .begin)
         socket.resume()
         defer { socket.cancel(with: .goingAway, reason: nil) }
         try await withTaskCancellationHandler {
@@ -187,7 +203,10 @@ struct Service {
                 let message = try await socket.receive()
                 if case .string(let json) = message,
                    let hint = try? JSONDecoder().decode([String: String].self, from: Data(json.utf8)),
-                   ["ready","available","outcome"].contains(hint["type"]) { await onWake() }
+                   ["ready","available","outcome"].contains(hint["type"]) {
+                    Diagnostics.event(.network, "socket.wake", .ok)
+                    await onWake()
+                }
             }
         } onCancel: { socket.cancel(with: .goingAway, reason: nil) }
     }
