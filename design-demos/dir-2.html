@@ -1,0 +1,1378 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>SecretChat · 消息回执</title>
+<style>
+:root {
+  --ink:#18372d;
+  --paper:#f8faf1;
+  --muted:#4d6558;
+  --board:#dce7de;
+  --accent:#b8f5cb;
+  --screen-bg:#102f28;
+  --ui-font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-family: var(--ui-font);
+  color: var(--ink);
+  background: var(--board);
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button,
+select {
+  cursor: pointer;
+}
+button {
+  color: inherit;
+}
+button:disabled {
+  cursor: default;
+  opacity: .48;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #5f94e7;
+  outline-offset: 3px;
+}
+button {
+  border: 0;
+  background: none;
+}
+svg.i {
+  height: 1.18em;
+  width: 1.18em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.board-header {
+  height: 76px;
+  border-bottom: 1px solid #b5c7ba;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 clamp(26px, 5.3vw, 90px);
+}
+.brandline,
+.mark,
+.board-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.brandline strong {
+  font-family:
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  font-size: 25px;
+  letter-spacing: -1.1px;
+  font-weight: 690;
+}
+.brandline .platform {
+  font-size: 13px;
+  letter-spacing: .02em;
+  padding-left: 15px;
+  border-left: 1px solid #9fb3a5;
+  color: var(--muted);
+}
+.board-meta {
+  font-size: 13px;
+  color: var(--muted);
+  gap: 9px;
+}
+.dir {
+  border: 1px solid #9eafa1;
+  border-radius: 6px;
+  font:
+    600 13px ui-monospace,
+    Menlo,
+    monospace;
+  padding: 3px 7px;
+}
+.stage {
+  width: min(1250px, 91vw);
+  min-height: calc(100vh - 76px);
+  margin: auto;
+  display: grid;
+  grid-template-columns: minmax(170px, 237px) minmax(340px, 1fr) minmax(355px, 424px);
+  align-items: center;
+  gap: clamp(20px, 3.3vw, 53px);
+  padding: 28px 0 32px;
+}
+.intro {
+  align-self: center;
+  padding-bottom: 50px;
+}
+.intro h1 {
+  font-size: clamp(36px, 3.2vw, 47px);
+  line-height: 1.16;
+  letter-spacing: -.07em;
+  margin: 0 0 18px;
+}
+.intro p {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--muted);
+  margin: 0;
+  max-width: 200px;
+}
+.flow-title {
+  margin: 45px 0 12px;
+  font-size: 12px;
+  letter-spacing: .07em;
+  color: var(--muted);
+}
+.flow-nav {
+  display: grid;
+  gap: 3px;
+  max-width: 204px;
+}
+.route {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  text-align: left;
+  padding: 12px 13px;
+  font-size: 15px;
+  border-radius: 9px;
+}
+.route svg:last-child {
+  width: 14px;
+  margin-left: auto;
+  opacity: 0;
+}
+.route.active {
+  background: #c5d7c9;
+  font-weight: 650;
+}
+.route.active svg:last-child {
+  opacity: 1;
+}
+.route:hover,
+.demo-btn:hover,
+.mini-link:hover {
+  background: #cadbcd;
+}
+.phone-col {
+  justify-self: center;
+  display: grid;
+  position: relative;
+  --screen-bg:#102f28;
+}
+.phone-col > div {
+  line-height: normal;
+}
+[data-app-slot] {
+  height: 100%;
+}
+#app {
+  height: 100%;
+  color: #f1f8ef;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.app-stack {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.app-top {
+  min-height: 60px;
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  align-items: center;
+  padding: 0 10px 5px;
+  border-bottom: 1px solid #365047;
+}
+.app-top strong {
+  display: block;
+  font-size: 19px;
+  line-height: 1.22;
+  letter-spacing: -.035em;
+}
+.app-top small {
+  font-size: 12px;
+  color: #aecabd;
+  display: block;
+  margin-top: 4px;
+}
+.app-top header {
+  text-align: center;
+}
+.id {
+  font-family:
+    ui-monospace,
+    "SFMono-Regular",
+    Menlo,
+    monospace;
+}
+.app-ic {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 22px;
+  color: #cfe9d6;
+}
+.app-ic:hover {
+  background: #27483e;
+}
+.messages {
+  flex: 1;
+  min-height: 160px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 38px 18px 18px;
+  overflow: auto;
+}
+.msg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  position: relative;
+}
+.msg.in {
+  align-items: flex-start;
+}
+.bubble {
+  position: relative;
+  padding: 13px 15px;
+  border-radius: 19px 19px 4px 19px;
+  background: #b4d8bd;
+  color: #17362a;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: .015em;
+  text-align: left;
+}
+.msg.selected .bubble {
+  background: #c2f3c9;
+}
+.msg.in .bubble {
+  color: #f0f6ec;
+  background: #2b4a41;
+  border-radius: 19px 19px 19px 4px;
+}
+.status {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 12px;
+  color: #b0cbbd;
+  padding: 6px 1px;
+  min-height: 30px;
+}
+.status svg:last-child {
+  width: 11px;
+}
+.msg.selected .status {
+  color: #c8f4cc;
+}
+.chat-action {
+  margin: 0 15px 6px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.compose {
+  border: 1px solid #426055;
+  border-radius: 22px;
+  background: #1d3b32;
+  color: #d9eade;
+  min-width: 0;
+  flex: 1;
+  height: 45px;
+  padding: 0 13px;
+  font-size: 14px;
+}
+.compose::placeholder {
+  color: #a8c0b2;
+}
+.sendbtn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #18362b;
+  display: grid;
+  place-items: center;
+  font-size: 21px;
+}
+.sendbtn:disabled {
+  background: #3a574b;
+  color: #c7d7c9;
+  opacity: 1;
+}
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 13px 15px 0;
+  background: #4b3e27;
+  color: #ffe5ac;
+  padding: 11px 12px;
+  text-align: left;
+  border-radius: 13px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.banner span {
+  flex: 1;
+}
+.paused {
+  color: #f1d69d;
+  text-align: center;
+  font-size: 13px;
+  margin: 0 12px 13px;
+}
+.app-main {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 19px 22px 26px;
+}
+.app-main h2 {
+  font-size: 28px;
+  letter-spacing: -.05em;
+  margin: 7px 0 9px;
+}
+.app-main p,
+.sheet p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #bdd0c4;
+  margin: 0 0 15px;
+}
+.formlabel {
+  display: block;
+  font-size: 13px;
+  margin: 13px 0 6px;
+  color: #d4e7da;
+}
+.entry,
+.code-field {
+  width: 100%;
+  height: 41px;
+  border-radius: 9px;
+  background: #234237;
+  border: 1px solid #486455;
+  padding: 0 10px;
+  color: #f2f8ec;
+  outline-offset: 2px;
+  font-size: 15px;
+}
+.entry::placeholder {
+  color: #aabfb0;
+}
+.formrow {
+  display: flex;
+  gap: 7px;
+}
+.formrow input {
+  min-width: 0;
+}
+.ghost-action,
+.primary-action,
+.secondary-action {
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  min-height: 42px;
+  padding: 9px 12px;
+}
+.ghost-action,
+.secondary-action {
+  color: #d2eed6;
+  background: #294b3c;
+}
+.ghost-action {
+  white-space: nowrap;
+}
+.primary-action {
+  display: block;
+  background: var(--accent);
+  color: #15372a;
+  width: 100%;
+  margin-top: 15px;
+}
+.secondary-action {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+}
+details.dev {
+  margin-top: 15px;
+  border-top: 1px solid #3b5448;
+  padding-top: 13px;
+  color: #c6daca;
+  font-size: 13px;
+}
+summary {
+  cursor: pointer;
+  min-height: 27px;
+}
+.checklabel {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 11px 0;
+}
+.checklabel input {
+  accent-color: #9ee7ad;
+}
+.app-main .hint {
+  font-size: 12px;
+  margin: 7px 0 0;
+  color: #afc8b8;
+}
+.feedback {
+  font-size: 13px;
+  color: #ffe3ab;
+  margin: 9px 0;
+  line-height: 1.5;
+  min-height: 0;
+}
+.empty-icon {
+  display: inline-grid;
+  place-items: center;
+  background: #234738;
+  border: 1px solid #436453;
+  border-radius: 20px;
+  width: 64px;
+  height: 64px;
+  font-size: 32px;
+  color: #c0e9c5;
+  margin: 21px 0 12px;
+}
+.invite {
+  margin-top: 17px;
+  background: #203d32;
+  padding: 13px;
+  border-radius: 13px;
+}
+.invite strong {
+  font:
+    600 23px ui-monospace,
+    Menlo,
+    monospace;
+  letter-spacing: .045em;
+  color: #d4f0d8;
+}
+.invite p {
+  margin: 9px 0 1px;
+}
+.contact-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  min-height: 59px;
+  text-align: left;
+  border-bottom: 1px solid #456052;
+  padding: 8px 0;
+  margin: 10px 0 18px;
+}
+.contact-row strong {
+  font-size: 18px;
+}
+.contact-row span {
+  display: block;
+}
+.contact-row small {
+  display: block;
+  color: #bdd0c4;
+  margin-top: 3px;
+}
+.contact-row > svg:last-child {
+  margin-left: auto;
+}
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: #0718109c;
+  display: flex;
+  align-items: flex-end;
+  z-index: 2;
+}
+.sheet {
+  background: #234337;
+  border: 1px solid #3d5c4d;
+  border-radius: 23px 23px 0 0;
+  padding: 11px 20px 16px;
+  width: 100%;
+  max-height: 94%;
+  overflow: auto;
+  box-shadow: 0 -10px 42px #06181025;
+}
+.grab {
+  display: block;
+  width: 33px;
+  height: 4px;
+  background: #668170;
+  margin: 0 auto 11px;
+  border-radius: 3px;
+}
+.sheet-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sheet-heading h3 {
+  margin: 0;
+  font-size: 21px;
+}
+.sheet .app-ic {
+  width: 33px;
+  height: 33px;
+  font-size: 16px;
+  background: #355742;
+}
+.sheet blockquote {
+  font-size: 14px;
+  margin: 10px 0 14px;
+  color: #e2f1e2;
+  line-height: 1.5;
+}
+.sheet p {
+  margin-top: 10px;
+}
+.sheet .steps {
+  margin: 9px 0 0;
+}
+.sheet .step {
+  grid-template-columns: 31px 1fr auto;
+  gap: 8px;
+  padding: 7px 0;
+  min-height: 41px;
+}
+.sheet .node {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+.sheet .step::before {
+  left: 13px;
+  top: 37px;
+  height: 8px;
+}
+.sheet .what strong {
+  font-size: 14px;
+}
+.sheet .what small {
+  display: none;
+}
+.sheet .step-tag {
+  font-size: 12px;
+  color: #cce2d0;
+}
+.sheet .node.done {
+  background: #42674e;
+  color: #d4f8d4;
+}
+.sheet .node.future {
+  border-color: #67806d;
+  color: #b6c7b9;
+  background: none;
+}
+.sheet .footnote {
+  color: #b8d1bd;
+  font-size: 12px;
+  line-height: 1.5;
+  border-color: #44654b;
+  padding-top: 10px;
+  margin: 10px 0 0;
+}
+</style>
+<style>
+.detail {
+  min-width: 0;
+  align-self: center;
+}
+.ticket {
+  position: relative;
+  background: var(--paper);
+  padding: 29px 29px 22px;
+  filter: drop-shadow(0 8px 9px #29493312);
+  border-radius: 19px 19px 0 0;
+  border: 1px solid #c5d5c4;
+  border-bottom: 0;
+}
+.ticket::after {
+  content: "";
+  position: absolute;
+  left: -1px;
+  bottom: -8px;
+  width: calc(100% + 2px);
+  height: 9px;
+  background:
+    linear-gradient(
+      135deg,
+      var(--paper) 26%,
+      transparent 26%) 0 0/16px 16px repeat-x,
+    linear-gradient(
+      225deg,
+      var(--paper) 26%,
+      transparent 26%) 0 0/16px 16px repeat-x;
+}
+.ticket-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ticket-head h2 {
+  font-size: 27px;
+  letter-spacing: -.055em;
+  line-height: 1.2;
+  margin: 0;
+}
+.ticket-head .i {
+  font-size: 22px;
+  color: #62826d;
+}
+.ticket blockquote {
+  font-size: 16px;
+  margin: 17px 0 19px;
+  line-height: 1.55;
+}
+.cutline {
+  position: relative;
+  border-top: 1px dashed #9fb4a3;
+  margin: 0 -29px;
+}
+.cutline::before,
+.cutline::after {
+  content: "";
+  position: absolute;
+  top: -7px;
+  background: var(--board);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+.cutline::before {
+  left: -7px;
+}
+.cutline::after {
+  right: -7px;
+}
+.steps {
+  margin: 16px 0 10px;
+}
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 41px 1fr auto;
+  align-items: center;
+  gap: 13px;
+  min-height: 65px;
+  padding: 7px 0;
+}
+.node {
+  width: 39px;
+  height: 39px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+}
+.node.done {
+  color: #305f41;
+  background: #dcecd9;
+}
+.node.current {
+  background: #315d42;
+  color: #e9fae6;
+}
+.node.future {
+  color: #7a8a79;
+  background: none;
+  border: 1px dashed #a4b3a0;
+}
+.step::before {
+  content: "";
+  position: absolute;
+  left: 19px;
+  top: 52px;
+  height: 25px;
+  border-left: 1px solid #a4b9a6;
+}
+.step:has(+ .step .future)::before {
+  border-left-style: dashed;
+}
+.step:last-child::before {
+  display: none;
+}
+.what strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 650;
+}
+.what small {
+  display: block;
+  font-size: 12px;
+  color: #556c5a;
+  margin-top: 4px;
+}
+.step-tag {
+  white-space: nowrap;
+  font-size: 12px;
+  color: #536a58;
+}
+.step-tag.confirmed {
+  color: #315d42;
+}
+.step-tag .i {
+  width: 15px;
+  margin-right: 3px;
+}
+.footnote {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-top: 1px solid #d4dfd0;
+  padding-top: 13px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #536859;
+  margin: 10px 0 0;
+}
+.footnote .i {
+  font-size: 13px;
+}
+.demo-controls {
+  margin-top: 29px;
+  border-top: 1px solid #acbfae;
+  padding-top: 15px;
+}
+.ctrl-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #3c5545;
+  font-size: 13px;
+  font-weight: 650;
+}
+.ctrl-title svg {
+  font-size: 15px;
+}
+.chips {
+  display: flex;
+  gap: 5px;
+  margin-top: 9px;
+}
+.demo-btn {
+  flex: 1;
+  border: 1px solid #a7bbab;
+  border-radius: 7px;
+  font-size: 13px;
+  padding: 8px 7px;
+  line-height: 1.4;
+  min-height: 36px;
+}
+.demo-btn.chosen {
+  background: #2f503e;
+  color: #eef6e9;
+  border-color: #2f503e;
+}
+.demo-hint,
+.control-note {
+  font-size: 12px;
+  color: #546b59;
+  line-height: 1.6;
+  margin: 7px 0 0;
+}
+.sample-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+.context-title {
+  font-size: 25px;
+  margin: 0 0 11px;
+  letter-spacing: -.045em;
+}
+.context-copy {
+  font-size: 15px;
+  line-height: 1.75;
+  margin: 10px 0;
+}
+.context-block {
+  background: var(--paper);
+  padding: 26px;
+  border-radius: 17px;
+  border: 1px solid #c2d2c3;
+}
+.context-block h3 {
+  font-size: 16px;
+  margin: 20px 0 8px;
+}
+.mini-link {
+  background: #c7dccb;
+  color: #24432e;
+  border: 1px solid #adc3b1;
+  min-height: 36px;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+.mobilebar {
+  display: none;
+}
+.read-plate {
+  font-size: 14px;
+  color: var(--muted);
+}
+@media (max-width: 1190px) and (min-width: 901px) {
+  .stage {
+    grid-template-columns: minmax(140px, 1fr) 337px minmax(280px, 1.5fr);
+    gap: 22px;
+    width: 94vw;
+  }
+  .phone-col {
+    zoom: .87;
+  }
+  .ticket {
+    padding: 22px 20px 17px;
+  }
+  .cutline {
+    margin: 0 -20px;
+  }
+  .step {
+    gap: 7px;
+  }
+  .intro h1 {
+    font-size: 34px;
+  }
+}
+@media (max-width: 900px) {
+  .stage {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    gap: 22px;
+    padding: 16px 12px 36px;
+    min-height: 0;
+  }
+  .intro {
+    display: none;
+  }
+  .board-header {
+    height: 54px;
+    margin: 0 20px;
+  }
+  .brandline strong {
+    font-size: 21px;
+  }
+  .brandline .platform {
+    display: none;
+  }
+  .mobilebar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    padding: 9px 0 0;
+  }
+  .mobilebar select {
+    font-size: 14px;
+    background: #eff6ec;
+    color: #1a382a;
+    border: 1px solid #a9bcae;
+    border-radius: 7px;
+    padding: 6px 21px 6px 8px;
+  }
+  .detail {
+    width: min(418px, 100%);
+    justify-self: center;
+  }
+  .phone-col {
+    max-width: 100%;
+  }
+  .demo-controls {
+    margin-top: 23px;
+  }
+  .ticket {
+    padding-top: 23px;
+  }
+}
+@media (max-width: 420px) {
+  .stage {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+  .phone-col {
+    width: 100%;
+    max-width: 387px;
+  }
+  .phone-col > div {
+    display: block !important;
+  }
+  .phone-col > div > div {
+    width: 100% !important;
+    height: min(742px, calc(100svh - 150px)) !important;
+    min-height: 550px;
+  }
+  .ticket {
+    padding-inline: 21px;
+  }
+  .cutline {
+    margin-inline: -21px;
+  }
+  .messages {
+    gap: 20px;
+    padding-top: 22px;
+  }
+  .step {
+    gap: 8px;
+  }
+  .bubble {
+    font-size: 15px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sheet {
+    animation: lift .18s ease-out;
+  }
+  @keyframes lift {
+    from {
+      transform: translateY(10px);
+      opacity: .75;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+}
+.stage {
+  position: relative;
+}
+#leader {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.messages:has(.msg:nth-child(3)) {
+  justify-content: center;
+  padding-top: 13px;
+  padding-bottom: 40px;
+  gap: 21px;
+}
+.msg.selected .status {
+  border: 1px solid #547863;
+  background: #234637;
+  padding: 3px 9px 3px 8px;
+  border-radius: 13px;
+  margin-top: 6px;
+  min-height: 25px;
+}
+.sim-sub {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 5px;
+}
+.text-link {
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 7px 0;
+  color: #405f4c;
+}
+.only-mobile {
+  display: none;
+}
+.sheet .node.current {
+  background: #b4e9b7;
+  color: #214333;
+}
+.sheet .step-tag.confirmed {
+  color: #d5ecda;
+}
+.messages:has(.msg:nth-child(3))::before,
+.messages:has(.msg:nth-child(3))::after {
+  content: "";
+  flex: 1 0 0;
+}
+.messages:has(.msg:nth-child(3))::before {
+  flex: .66 0 0;
+}
+.what small {
+  font-size: 13px;
+}
+.ticket .step {
+  min-height: 67px;
+}
+.step-tag {
+  font-size: 13px;
+}
+@media (max-width: 900px) {
+  #leader {
+    display: none;
+  }
+  .only-mobile {
+    display: block;
+    margin-top: 16px;
+  }
+  .demo-controls .mini-link {
+    min-height: 40px;
+  }
+}
+@media (max-width: 420px) {
+  .messages:has(.msg:nth-child(3)) {
+    gap: 12px;
+    padding: 10px 16px 14px;
+  }
+  .sim-sub {
+    flex-wrap: wrap;
+  }
+}
+</style></head><body>
+<header class="board-header"><div class="brandline"><strong>SecretChat</strong><span class="platform">iOS 交互原型</span></div><div class="board-meta">首次对话<span class="dir">B</span></div></header>
+<div class="mobilebar"><label for="scene-select">演示场景</label><select id="scene-select"></select><button class="mini-link" data-act="show-sim">模拟事件</button></div>
+<main class="stage"><svg id="leader" aria-hidden="true"></svg><aside class="intro"><h1>消息回执</h1><p>点开消息下方的回执，查看它到了哪一步。</p><div class="flow-title">演示场景</div><nav class="flow-nav" aria-label="演示场景"></nav></aside>
+<div class="phone-col"><div style="display:inline-block;padding:12px;background:#000;border-radius:60px;box-shadow:0 0 0 2px #1f2937, 0 20px 60px rgba(0,0,0,0.3);position:relative"><div style="position:relative;border-radius:48px;overflow:hidden;background:var(--screen-bg);width:363px;height:742px"><div data-lint-skip="" style="position:absolute;top:0;left:0;right:0;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 32px 0 32px;font-size:16px;font-weight:600;font-family:-apple-system, &quot;SF Pro Text&quot;, sans-serif;z-index:20;pointer-events:none;color:#fff"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><div style="display:flex;align-items:flex-end;gap:2px;height:12px"><div style="width:3px;background:currentColor;border-radius:1px;height:4px"></div><div style="width:3px;background:currentColor;border-radius:1px;height:6px"></div><div style="width:3px;background:currentColor;border-radius:1px;height:9px"></div><div style="width:3px;background:currentColor;border-radius:1px;height:11px"></div></div><svg width="16" height="12" viewBox="0 0 16 12" fill="none" style="color:#fff"><path d="M8 11.5a1 1 0 100-2 1 1 0 000 2z" fill="currentColor"></path><path d="M3 7.5a7 7 0 0110 0" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"></path><path d="M1 4.5a11 11 0 0114 0" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" opacity="0.7"></path></svg><div style="width:26px;height:12px;border:1.5px solid currentColor;border-radius:3px;padding:1px;position:relative;opacity:0.8"><div style="width:85%;height:100%;background:currentColor;border-radius:1px;opacity:0.9"></div><div style="position:absolute;top:3px;right:-3px;width:2px;height:6px;background:currentColor;border-radius:0 1px 1px 0"></div></div></div></div><div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:124px;height:36px;background:#000;border-radius:999px;z-index:30"></div><div style="position:absolute;top:54px;left:0;right:0;bottom:34px;overflow:auto"><div data-app-slot=""><div id="app"></div></div></div><div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:140px;height:5px;background:rgba(255,255,255,0.5);border-radius:999px;z-index:10"></div></div></div></div><section class="detail" aria-label="互动细节" id="detail"></section></main>
+<script>
+"use strict";
+const icons = { back: '<path d="m14.5 4.5-7 7.5 7 7.5"/>', next: '<path d="m9 5 7 7-7 7"/>', up: '<path d="M12 20V4m-7 7 7-7 7 7"/>', card: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 9h5m-5 4h8"/>', contacts: '<path d="M3 6h3m-3 6h3m-3 6h3"/><rect x="5" y="3" width="15" height="18" rx="3"/><circle cx="12.5" cy="10" r="2.3"/><path d="M9 16c.5-3 6.5-3 7 0"/>', chat: '<path d="M21 11a8.5 8.5 0 0 1-9 8.5H9l-5 2 1.4-4.2A8.1 8.1 0 0 1 3 11c0-4.7 4-8 9-8s9 3.3 9 8Z"/><path d="M8 10h8m-8 4h5"/>', shield: '<path d="M12 2.5 20 6v6c0 4-4.5 7.6-8 9.5C8.5 19.6 4 16 4 12V6Z"/><path d="M12 8v4m0 3v.1"/>', phone: '<rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10 5h4m-3 13.5h2"/>', server: '<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.1M7 16.5h.1m5 0h5m-5-9h5"/>', receiver: '<rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="m8.5 11.5 2.5 2.5 4.5-5M11 18.5h2"/>', check: '<path d="m4 12 5 5L20 6"/>', double: '<path d="m2 12 4 4L16 6m-6 9 2 2L22 7"/>', clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/>', info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/>', sliders: '<path d="M3 7h6m4 0h8M3 17h11m4 0h3"/><circle cx="11" cy="7" r="2"/><circle cx="16" cy="17" r="2"/>', receipt: '<path d="M5 3h14v18l-3-2-4 2-4-2-3 2V3Z"/><path d="M8 7h8m-8 4h6"/>', refresh: '<path d="M20 4v6h-6"/><path d="M19.5 9a8 8 0 1 0 .1 6"/>', close: '<path d="m6 6 12 12m0-12L6 18"/>', lock: '<rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>', ticket: '<path d="M3 6h18v5a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4Z"/><path d="M15 8v2m0 3v2"/>' };
+const ic = (name) => '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + icons[name] + "</svg>";
+const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const routes = [["reg", "受邀注册", "card"], ["contacts", "联系人", "contacts"], ["chat", "首次对话", "chat"], ["pause", "身份变化", "shield"]];
+const lines = ["周六还是十点见吗？", "十点，老地方见。", "好，我会提前五分钟到。"];
+const statuses = ["本机待提交", "服务端已接收", "对方设备已收到"];
+const statusIcons = ["clock", "check", "double"];
+const regDefaults = () => ({ invite: "", email: "", code: "", base: "https://demo.example.test/secretchat", dev: false, open: false, challenge: false });
+let s = { screen: "chat", count: 3, phase: 1, first: 2, selected: 2, paused: false, offline: false, ready: true, inviter: true, redeemed: false, issued: "", modal: "", feedback: "", reg: regDefaults(), draft: "" };
+const route = () => s.screen === "chat" && s.paused ? "pause" : s.screen;
+const el = (id) => document.getElementById(id);
+const btn = (label, act, cls = "secondary-action", extra = "") => '<button class="' + cls + '" data-act="' + act + '" ' + extra + ">" + label + "</button>";
+const foot = "设备确认代表送达，无法据此确认对方是否阅读。";
+function evidence(n, compact = false) {
+  const titles = ["本机", "服务端", "对方设备"], details = ["已保存在这台设备", "等待消息服务接收", "等待接收设备确认"];
+  if (n >= 1) details[1] = "服务已接受这条消息";
+  if (n === 2) details[2] = "接收设备已返回确认";
+  const labels = [n === 0 ? "待提交" : "已提交", n >= 1 ? "已接收" : "待接收", n === 2 ? "已确认" : "待确认"];
+  return '<div class="steps">' + titles.map((t, i) => '<div class="step"><span class="node ' + (i < n ? "done" : i === n ? "current" : "future") + '">' + ic(["phone", "server", "receiver"][i]) + '</span><div class="what"><strong>' + t + "</strong><small>" + details[i] + '</small></div><span class="step-tag ' + (i <= n ? "confirmed" : "") + '">' + (i <= n && !(i === 0 && n === 0) ? ic("check") : "") + labels[i] + "</span></div>").join("") + '</div><p class="footnote">' + ic("info") + foot + "</p>";
+}
+function note() {
+  return '<div class="feedback" role="status">' + esc(s.feedback) + "</div>";
+}
+function topbar(title, subtitle = "", backAct = "", rightAct = "", rightIcon = "info", rightLabel = "联系人信息") {
+  return '<div class="app-top">' + (backAct ? btn(ic("back"), backAct, "app-ic", 'aria-label="返回"') : "<span></span>") + "<header><strong " + (title === "7a31c8d2" ? 'class="id"' : "") + ">" + title + "</strong>" + (subtitle ? "<small>" + subtitle + "</small>" : "") + "</header>" + (rightAct ? btn(ic(rightIcon), rightAct, "app-ic", 'aria-label="' + rightLabel + '"') : "") + "</div>";
+}
+function regScreen() {
+  const r = s.reg;
+  return topbar("SecretChat") + '<section class="app-main"><h2>受邀注册</h2><p>使用邀请方给你的单次邀请码注册这台设备。</p><form id="register" novalidate><label class="formlabel" for="invite">邀请码</label><input class="entry" id="invite" data-reg="invite" autocomplete="off" value="' + esc(r.invite) + '"><label class="formlabel" for="email">邮箱</label><input id="email" class="entry" type="email" data-reg="email" autocomplete="off" value="' + esc(r.email) + '">' + (r.dev ? "" : '<label class="formlabel" for="code">六位邮箱验证码</label><div class="formrow"><input id="code" class="entry" inputmode="numeric" maxlength="6" data-reg="code" value="' + esc(r.code) + '">' + btn(r.challenge ? "重取验证码" : "获取验证码", "challenge", "ghost-action", 'type="button"') + "</div>") + note() + '<button class="primary-action" type="submit">注册设备</button><details class="dev" ' + (r.open ? "open" : "") + '><summary>开发设置</summary><label class="formlabel" for="base">HTTPS 服务根地址</label><input class="entry" data-reg="base" id="base" type="url" value="' + esc(r.base) + '"><label class="checklabel"><input type="checkbox" data-act="dev" ' + (r.dev ? "checked" : "") + '> 服务已开启免验证码联调</label><p class="hint">仅供配套测试服务使用。</p></details></form></section>';
+}
+function contactsScreen() {
+  return topbar("联系人", "", "", "refresh", "refresh", "刷新联系人") + '<section class="app-main">' + (s.ready ? '<button class="contact-row" data-act="enter"><span><strong class="id">7a31c8d2</strong><small>' + (s.paused ? "设备身份已变化" : "身份未核验") + "</small></span>" + ic("next") + "</button>" : '<span class="empty-icon">' + ic("contacts") + "</span><h2>还没有联系人</h2><p>刷新目录查看邀请方，或生成一次性邀请码，邀请对方注册。</p>") + btn("生成单次邀请码", "issue", "primary-action") + (s.issued ? '<div class="invite"><strong>' + s.issued + '</strong><p class="hint">' + (s.redeemed ? "此邀请码已使用。" : "仅限一人注册一次。") + "</p>" + (s.redeemed ? "" : btn("分享邀请码", "share") + btn("复制邀请码", "copy")) + "</div>" : "") + btn("刷新联系人", "refresh") + note() + "</section>";
+}
+function chatScreen() {
+  const group = lines.slice(0, s.count).map((t, i) => {
+    const n = i === 0 ? s.first : s.phase;
+    if (i === 1) return '<div class="msg in"><div class="bubble">' + t + "</div></div>";
+    return '<div class="msg ' + (s.selected === i ? "selected" : "") + '">' + btn(t, "receipt-" + i, "bubble", 'aria-label="查看这条消息的回执，' + t + '"') + btn(ic(statusIcons[n]) + statuses[n] + ic("next"), "receipt-" + i, "status") + "</div>";
+  }).join("");
+  return topbar("7a31c8d2", s.paused ? "身份变化" : "身份未核验", "back-contacts", "peer") + (s.paused ? btn(ic("shield") + "<span>设备身份已变化，发送已暂停</span>" + ic("next"), "reason", "banner") : "") + '<div class="messages">' + (group || '<p class="read-plate" style="color:#b8cdbd;font-size:14px">发送第一条消息，开始对话。</p>') + "</div>" + note() + (s.paused ? '<p class="paused">' + ic("lock") + " 新消息和待提交消息的重试均已暂停</p>" : '<form id="compose-form" class="chat-action"><input class="compose" id="draft" aria-label="文字消息" placeholder="文字消息" autocomplete="off" value="' + esc(s.draft) + '"><button class="sendbtn" type="submit" aria-label="发送" ' + (!s.draft.trim() ? "disabled" : "") + ">" + ic("up") + "</button></form>");
+}
+function sheet() {
+  if (!s.modal) return "";
+  let title, body;
+  if (s.modal === "receipt") {
+    title = "消息回执";
+    body = "<blockquote>「" + lines[s.selected] + "」</blockquote>" + evidence(s.selected === 0 ? s.first : s.phase, true);
+  } else if (s.modal === "reason") {
+    title = "设备身份已变化";
+    body = "<p>目录中的设备标识或身份公钥与本机上次保存的记录不一致。</p><p>已暂停向这个联系人发送新消息，也会暂停重试待提交的消息。请通过电话或当面联系对方，确认是否更换了设备。</p>" + btn("返回对话", "close", "primary-action");
+  } else if (s.modal === "share") {
+    title = "分享邀请码";
+    body = '<p>将这串单次邀请码发送给对方。</p><div class="invite"><strong>' + s.issued + "</strong></div>" + btn("复制邀请码", "copy", "primary-action");
+  } else {
+    title = "联系人信息";
+    body = '<p class="id">7a31c8d2</p><p>' + (s.paused ? "设备身份已变化。" : "当前身份未核验。") + "</p>" + (s.paused ? btn("了解暂停原因", "reason", "primary-action") : "");
+  }
+  return '<div class="scrim"><section role="dialog" aria-modal="true" aria-label="' + title + '" class="sheet"><span class="grab"></span><div class="sheet-heading"><h3>' + title + "</h3>" + btn(ic("close"), "close", "app-ic", 'aria-label="关闭详情"') + "</div>" + body + "</section></div>";
+}
+function controls() {
+  let content = "";
+  if (s.screen === "chat") {
+    if (s.paused) {
+      content = '<p class="demo-hint">本场景已冻结投递。重新载入对话样例可体验其他状态。</p>' + btn("重新载入对话样例", "scene-chat", "mini-link");
+    } else if (s.count === 3) {
+      content = '<div class="chips" aria-label="末条消息的投递快照">' + ["离线待提交", "服务已接收", "设备已确认"].map((v, i) => btn(v, "phase-" + i, "demo-btn " + (s.phase === i ? "chosen" : ""), 'aria-pressed="' + (s.phase === i) + '"')).join("") + '</div><div class="sim-sub"><p class="demo-hint">切换末条消息的投递快照。</p>' + btn("模拟身份变化", "identity", "text-link") + "</div>";
+    } else if (s.count === 1) {
+      content = '<div class="sample-actions">' + btn("模拟设备确认并回复", "reply", "mini-link") + "</div>";
+    } else {
+      content = '<div class="sample-actions">' + btn(s.offline ? "模拟恢复在线" : "模拟网络离线", "network", "mini-link") + btn("填入示例消息", "fill-draft", "mini-link") + '</div><p class="demo-hint">' + (s.count === 0 ? "首次建会话需要在线取得对方预密钥。" : "已有会话支持离线保存待提交的消息。") + "</p>";
+    }
+  } else if (s.screen === "reg") {
+    content = '<p class="demo-hint">使用本地测试数据演练注册流程。</p><div class="sample-actions">' + btn("填入测试数据", "sample", "mini-link") + "</div>";
+  } else {
+    content = '<p class="demo-hint">' + (s.redeemed ? "已模拟对方注册，请在手机里刷新目录。" : "可模拟另一台设备使用当前邀请码完成注册。") + '</p><div class="sample-actions">' + btn("模拟对方完成注册", "redeem", "mini-link", !s.issued || s.redeemed ? "disabled" : "") + "</div>";
+  }
+  return '<section class="demo-controls" id="sim"><div class="ctrl-title">' + ic("sliders") + "场景模拟</div>" + content + "</section>";
+}
+function panel() {
+  if (s.screen === "chat" && s.count > 0) {
+    const i = s.count === 1 ? 0 : s.selected, n = i === 0 ? s.first : s.phase;
+    return '<article class="ticket"><div class="ticket-head"><h2>投递详情</h2>' + ic("receipt") + "</div><blockquote>「" + lines[i] + '」</blockquote><div class="cutline"></div>' + evidence(n) + "</article>" + controls();
+  }
+  let title, copy;
+  if (s.screen === "reg") {
+    title = "受邀注册";
+    copy = "一次性邀请码绑定邀请关系，邮箱验证码用于完成设备注册。";
+  } else if (s.screen === "contacts") {
+    title = "联系人目录";
+    copy = "邀请关系建立后，刷新目录即可看到联系人短号。";
+  } else {
+    title = "开始首次对话";
+    copy = "发送第一条示例消息后，可点开气泡下方的投递回执。";
+  }
+  return '<div class="context-block"><h2 class="context-title">' + title + '</h2><p class="context-copy">' + copy + "</p></div>" + controls();
+}
+function render() {
+  el("app").innerHTML = '<div class="app-stack">' + (s.screen === "reg" ? regScreen() : s.screen === "contacts" ? contactsScreen() : chatScreen()) + "</div>" + sheet();
+  document.querySelector(".flow-nav").innerHTML = routes.map(([k, name, icon]) => btn(ic(icon) + name + ic("next"), "scene-" + k, "route " + (route() === k ? "active" : ""), 'aria-current="' + (route() === k ? "step" : "false") + '"')).join("");
+  el("scene-select").innerHTML = routes.map(([k, v]) => '<option value="' + k + '" ' + (route() === k ? "selected" : "") + ">" + v + "</option>").join("");
+  el("detail").innerHTML = panel() + btn("返回手机", "show-phone", "mini-link only-mobile");
+  requestAnimationFrame(linkSelection);
+}
+function linkSelection() {
+  const svg = el("leader"), tag = document.querySelector(".msg.selected .status"), card = document.querySelector(".ticket");
+  if (!tag || !card || innerWidth <= 900 || s.modal) {
+    svg.innerHTML = "";
+    return;
+  }
+  const stage = document.querySelector(".stage").getBoundingClientRect(), phone = document.querySelector(".phone-col").getBoundingClientRect(), a = tag.getBoundingClientRect(), b = card.getBoundingClientRect(), row = card.querySelector(".node.current").getBoundingClientRect();
+  const x1 = phone.right - stage.left + 5, x2 = b.left - stage.left - 6, y1 = a.top + a.height / 2 - stage.top, y2 = row.top + row.height / 2 - stage.top, gap = (x2 - x1) * 0.52;
+  svg.innerHTML = '<path d="M ' + x1 + " " + y1 + " C " + (x1 + gap) + " " + y1 + ", " + (x2 - gap) + " " + y2 + ", " + x2 + " " + y2 + '" fill="none" stroke="#799884" stroke-width="1.4" stroke-dasharray="3 4"/><circle cx="' + x1 + '" cy="' + y1 + '" r="2.5" fill="#799884"/><circle cx="' + x2 + '" cy="' + y2 + '" r="2.5" fill="#799884"/>';
+}
+window.addEventListener("resize", linkSelection);
+function go(k) {
+  s.modal = "";
+  s.feedback = "";
+  s.paused = k === "pause";
+  s.screen = k === "pause" ? "chat" : k;
+  s.selected = 2;
+  s.ready = k === "chat" || k === "pause";
+  s.issued = "";
+  s.redeemed = false;
+  s.inviter = true;
+  s.count = k === "chat" || k === "pause" ? 3 : 0;
+  s.first = 2;
+  s.phase = k === "pause" ? 0 : 1;
+  s.offline = false;
+  s.draft = "";
+  s.reg = regDefaults();
+  render();
+}
+function goodEmail() {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.reg.email.trim());
+}
+function validBase() {
+  try {
+    const u = new URL(s.reg.base);
+    return u.protocol === "https:" && !!u.hostname && !u.username && !u.password && !u.hash && !u.search;
+  } catch {
+    return false;
+  }
+}
+function register() {
+  const r = s.reg;
+  if (!validBase()) s.feedback = "请在开发设置填写有效的 HTTPS 服务根地址。";
+  else if (r.invite.trim().toUpperCase() !== "M7KD-29QP") s.feedback = "请输入有效的演示邀请码。";
+  else if (!goodEmail()) s.feedback = "请填写有效的邮箱。";
+  else if (!r.dev && !r.challenge) s.feedback = "请先获取邮箱验证码。";
+  else if (!r.dev && r.code !== "246810") s.feedback = "验证码不正确，请重新输入六位验证码。";
+  else {
+    s.screen = "contacts";
+    s.ready = false;
+    s.inviter = true;
+    s.feedback = "设备已注册，可刷新联系人目录。";
+  }
+  render();
+}
+function send() {
+  if (s.paused) return;
+  const next = s.count === 0 ? 0 : s.count === 2 ? 2 : -1;
+  if (next < 0 || s.draft.trim() !== lines[next]) {
+    s.feedback = next < 0 ? "当前示例对话已包含该阶段的消息。" : "本方向稿仅演示固定对话，请使用场景模拟填入示例消息。";
+  } else if (next === 0 && s.offline) {
+    s.feedback = "首次发送需联网取得对方预密钥。恢复在线后可再发送。";
+  } else {
+    s.count++;
+    s.selected = next;
+    if (next === 0) s.first = 0;
+    else s.phase = 0;
+    s.draft = "";
+    s.feedback = "";
+  }
+  render();
+}
+function issueCode() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  const raw = Array.from(bytes, (n) => alphabet[n % alphabet.length]).join("");
+  return raw.slice(0, 4) + "-" + raw.slice(4);
+}
+async function copyCode() {
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(s.issued);
+    ok = true;
+  } catch {
+    const x = document.createElement("textarea");
+    x.value = s.issued;
+    document.body.append(x);
+    x.select();
+    ok = document.execCommand("copy");
+    x.remove();
+  }
+  s.modal = "";
+  s.feedback = ok ? "邀请码已复制。" : "请选中邀请码并手动复制。";
+  render();
+}
+document.addEventListener("input", (e) => {
+  if (e.target.dataset.reg) {
+    const key = e.target.dataset.reg;
+    s.reg[key] = e.target.value;
+    if (key === "email" || key === "base") s.reg.challenge = false;
+  } else if (e.target.id === "draft") {
+    s.draft = e.target.value;
+    document.querySelector(".sendbtn").disabled = !s.draft.trim();
+  }
+});
+document.addEventListener("toggle", (e) => {
+  if (e.target.matches("details.dev")) s.reg.open = e.target.open;
+}, true);
+document.addEventListener("change", (e) => {
+  if (e.target.id === "scene-select") go(e.target.value);
+  if (e.target.dataset.act === "dev") {
+    s.reg.dev = e.target.checked;
+    s.reg.open = true;
+    s.feedback = "";
+    render();
+  }
+});
+document.addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (e.target.id === "register") register();
+  else if (e.target.id === "compose-form") send();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && s.modal) {
+    s.modal = "";
+    render();
+  }
+});
+document.addEventListener("click", async (e) => {
+  let a = e.target.closest("[data-act]")?.dataset.act;
+  if (!a && e.target.classList.contains("scrim")) a = "close";
+  if (!a || a === "dev") return;
+  if (a.startsWith("scene-")) {
+    go(a.slice(6));
+    return;
+  }
+  if (a.startsWith("receipt-")) {
+    s.selected = Number(a.slice(-1));
+    s.modal = "receipt";
+  } else if (a.startsWith("phase-")) {
+    if (s.paused) return;
+    s.phase = Number(a.slice(-1));
+    s.offline = s.phase === 0;
+    s.selected = 2;
+    s.feedback = "";
+  } else if (a === "identity") {
+    s.paused = true;
+    s.modal = "";
+    s.feedback = "";
+  } else if (a === "close") s.modal = "";
+  else if (a === "peer" || a === "reason") s.modal = a;
+  else if (a === "back-contacts") {
+    s.screen = "contacts";
+    s.feedback = "";
+    s.modal = "";
+  } else if (a === "sample") {
+    Object.assign(s.reg, { invite: "M7KD-29QP", email: "demo@example.test", code: "246810", challenge: true });
+    s.feedback = "已填入测试数据，可注册设备。";
+  } else if (a === "challenge") {
+    if (!validBase() || !goodEmail()) s.feedback = "请填写有效邮箱及 HTTPS 服务地址。";
+    else {
+      s.reg.challenge = true;
+      s.feedback = "本地演示验证码为 246810。";
+    }
+  } else if (a === "issue") {
+    s.issued = issueCode();
+    s.redeemed = false;
+    s.feedback = "";
+  } else if (a === "redeem") {
+    s.redeemed = true;
+    s.feedback = "";
+  } else if (a === "copy") {
+    await copyCode();
+    return;
+  } else if (a === "share") {
+    if (navigator.share) {
+      try {
+        await navigator.share({ text: s.issued });
+        s.feedback = "已打开系统分享。";
+      } catch (err) {
+        if (err.name !== "AbortError") s.modal = "share";
+      }
+    } else s.modal = "share";
+  } else if (a === "refresh") {
+    if (s.inviter || s.redeemed) {
+      s.ready = true;
+      s.feedback = "联系人目录已刷新。";
+    } else s.feedback = "暂无新的联系人。";
+  } else if (a === "enter") {
+    s.screen = "chat";
+    s.feedback = "";
+    s.draft = s.count === 0 ? lines[0] : s.count === 2 ? lines[2] : "";
+  } else if (a === "reply") {
+    if (s.paused || s.count !== 1) return;
+    s.count = 2;
+    s.first = 2;
+    s.offline = false;
+    s.draft = lines[2];
+    s.feedback = "";
+  } else if (a === "network") {
+    if (s.paused) return;
+    s.offline = !s.offline;
+    s.feedback = s.offline ? "当前设备离线。" : "当前设备在线。";
+  } else if (a === "fill-draft") {
+    s.draft = s.count === 0 ? lines[0] : s.count === 2 ? lines[2] : "";
+    s.feedback = "";
+  } else if (a === "show-sim") {
+    el("sim").scrollIntoView({ block: "center" });
+    return;
+  } else if (a === "show-phone") {
+    document.querySelector(".mobilebar").scrollIntoView({ block: "start" });
+    return;
+  }
+  render();
+});
+render();
+</script></body></html>

@@ -1,0 +1,15 @@
+{
+  "originHash" : "6f388d4c63958ab28d7c20e1639576697ef175d6d22f7b17ad6983176f3805ff",
+  "pins" : [
+    {
+      "identity" : "libsignal",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/signalapp/libsignal",
+      "state" : {
+        "revision" : "08a4b5ade3ed5d5e48ce8d0bc94e7d2041a3a3b1",
+        "version" : "0.108.6"
+      }
+    }
+  ],
+  "version" : 3
+}

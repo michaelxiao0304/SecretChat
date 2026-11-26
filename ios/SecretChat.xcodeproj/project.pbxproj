@@ -1,0 +1,845 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		09B7114E62475A1A342C1A09 /* Vault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4563C9249BACED8AD5D95C0B /* Vault.swift */; };
+		1CAD37801DF3C3C1926DBB51 /* SignalBinary in Frameworks */ = {isa = PBXBuildFile; productRef = 4CD974C6690936867A0E5F0C /* SignalBinary */; };
+		1D12338FCB07F3273B338B97 /* MailboxSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47594C0514339E7FA1A5EDBA /* MailboxSync.swift */; };
+		1D19EAD50BFCB3D8CE334867 /* ConversationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 948583E06E3524A6540D29A8 /* ConversationTests.swift */; };
+		211268C0F5C96153E6268082 /* Vault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4563C9249BACED8AD5D95C0B /* Vault.swift */; };
+		2BF48EFD854BFEBA8BA9A068 /* InvitationLetter.png in Resources */ = {isa = PBXBuildFile; fileRef = 6EA531D99D7AD14C55FBECF3 /* InvitationLetter.png */; };
+		2DD4CDFC69326D15D1DAFA16 /* Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB18358975C8CBE207DFA162 /* Diagnostics.swift */; };
+		2E74567D1AC8E9D814944EC0 /* MailboxSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47594C0514339E7FA1A5EDBA /* MailboxSync.swift */; };
+		56BF210601832DDCC5B5BCCD /* LibSignalClient in Frameworks */ = {isa = PBXBuildFile; productRef = 7CB284A38B882D097324032E /* LibSignalClient */; };
+		58E30AE8851C29B14AB3D695 /* SyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B73517BEE43A4397B804820 /* SyncTests.swift */; };
+		5A4B97FFC020FA0CE8EAC661 /* LibSignalClient in Frameworks */ = {isa = PBXBuildFile; productRef = 1C7AD7524524A0AD02344397 /* LibSignalClient */; };
+		61EDC3ABEA61ABD59C237D5E /* ConversationScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298AB6C44E426579231E198 /* ConversationScreen.swift */; };
+		6A4C64EFB4352544D67CDFAD /* VaultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33C8A71179A5518C3C1A768 /* VaultTests.swift */; };
+		6B417EA76B5DA2234D448C7E /* SignalBinary in Frameworks */ = {isa = PBXBuildFile; productRef = 6EA30ACCE23B5C88B800C19D /* SignalBinary */; };
+		6D196F2CE1986526C966ADF9 /* SignalConversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1D396BF49413BE3688313FF /* SignalConversation.swift */; };
+		6E10DB0F00D8F103A04C6209 /* HTTPReply.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDE328107560AA769340AB1 /* HTTPReply.swift */; };
+		7570E86AF5482544688890EA /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCE5DA2655E4CB06F005B29 /* Profile.swift */; };
+		7844C3503D54FCA7025A9207 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3EF918291F874C0D499117E8 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7DA314C6C7F83C6B1F17E851 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9A66DA1542E91D3A3404A4 /* Service.swift */; };
+		7F109BA5A19662FA6B98B890 /* FirstConversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7457D83C14ABA5E4EBC909F /* FirstConversation.swift */; };
+		980BCD1F30C99475120D96AF /* NotificationPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48167FD573C190377000A533 /* NotificationPreview.swift */; };
+		9DE3560B479E4AA2EB01820F /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFCE5DA2655E4CB06F005B29 /* Profile.swift */; };
+		A4664EA7ABA08C08F2F5FCDD /* NotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 894C0A289692CF35B29E81CE /* NotificationTests.swift */; };
+		A4D0D30C928E95D304200C2F /* SecretChatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DA5719C3A7BA30F24E6937A /* SecretChatApp.swift */; };
+		ACF21B83F364FE3AF2FD4F40 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1367F02C2B19567E33D82FB /* NotificationService.swift */; };
+		B5759980FEEE2167E82710E7 /* InvitationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F502F49537905EB4727B97 /* InvitationUITests.swift */; };
+		B9ABE5F306CDFBD2B28A1E92 /* Diagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB18358975C8CBE207DFA162 /* Diagnostics.swift */; };
+		BC0BF8910078AC904E4122BA /* DiagnosticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26FA3BFF51D11B9DC3EB266 /* DiagnosticsTests.swift */; };
+		BD971ABC2883F2DB2EB28942 /* FirstConversationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC81A0D32FC01C74662785B2 /* FirstConversationTests.swift */; };
+		BE40A90E5A29851505F52B8C /* InvitationScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D59AFBE629F4979F1DB9CD6 /* InvitationScreen.swift */; };
+		C4FDE47DF85D02D68D03B87C /* ContactsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E07B70D0895D0DC093CA2A /* ContactsScreen.swift */; };
+		D1B6B627EBD72BF737B78963 /* DeviceFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA8B37A01AB45E10F2F48D76 /* DeviceFlowTests.swift */; };
+		DD298FCF6B85FD23FA39FD09 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 79ADD1B86BDCE8EECA00CE76 /* Assets.xcassets */; };
+		E2BDBB10170C5AD4419EA2F0 /* MailboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BA7FC4A6CF19D2A85DED40 /* MailboxTests.swift */; };
+		EC9EFEB914C6587B169A60CF /* SignalConversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1D396BF49413BE3688313FF /* SignalConversation.swift */; };
+		EDD45871AADE06F3DA1A1CBB /* DeviceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A20554C7115CD8D219ED921 /* DeviceModel.swift */; };
+		F9F20C8FC6A3813927C33AED /* ServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08A8E0B94492A6176937F8A /* ServiceTests.swift */; };
+		FF278FEFFF7F16476B7A08E3 /* NotificationPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48167FD573C190377000A533 /* NotificationPreview.swift */; };
+		FFEAA60FAB60849B0914EE49 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A9A66DA1542E91D3A3404A4 /* Service.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		559E22F732CF5514732001A5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A25F4666375DA48C9F749E84 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7E351910B39496360D25EF2E;
+			remoteInfo = SecretChat;
+		};
+		9A295A53488960FA40D2F563 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A25F4666375DA48C9F749E84 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FDCC0CDD6D124CF7A61BB56C;
+			remoteInfo = NotificationService;
+		};
+		C7A787D39784F05ECCFC20BB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A25F4666375DA48C9F749E84 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7E351910B39496360D25EF2E;
+			remoteInfo = SecretChat;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		980F97E149A2024CA825ABDE /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				7844C3503D54FCA7025A9207 /* NotificationService.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		00DCAEFF4067EC5B760B5246 /* SecretChatTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SecretChatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		19EFBFB6DAB73423E0C26918 /* SecretChatUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SecretChatUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E61BF1F4CC24BD0B2AF3F6D /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
+		2BDE328107560AA769340AB1 /* HTTPReply.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPReply.swift; sourceTree = "<group>"; };
+		31BA7FC4A6CF19D2A85DED40 /* MailboxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailboxTests.swift; sourceTree = "<group>"; };
+		37AC3658AE6BD3C7E99CCBFF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		37E07B70D0895D0DC093CA2A /* ContactsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsScreen.swift; sourceTree = "<group>"; };
+		3EF918291F874C0D499117E8 /* NotificationService.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4563C9249BACED8AD5D95C0B /* Vault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vault.swift; sourceTree = "<group>"; };
+		47594C0514339E7FA1A5EDBA /* MailboxSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailboxSync.swift; sourceTree = "<group>"; };
+		48167FD573C190377000A533 /* NotificationPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreview.swift; sourceTree = "<group>"; };
+		5298AB6C44E426579231E198 /* ConversationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationScreen.swift; sourceTree = "<group>"; };
+		5A732BEC89A448EDF93347E6 /* Notification.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Notification.entitlements; sourceTree = "<group>"; };
+		5A9A66DA1542E91D3A3404A4 /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
+		6A20554C7115CD8D219ED921 /* DeviceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceModel.swift; sourceTree = "<group>"; };
+		6B73517BEE43A4397B804820 /* SyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTests.swift; sourceTree = "<group>"; };
+		6DA5719C3A7BA30F24E6937A /* SecretChatApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecretChatApp.swift; sourceTree = "<group>"; };
+		6EA531D99D7AD14C55FBECF3 /* InvitationLetter.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = InvitationLetter.png; sourceTree = "<group>"; };
+		79ADD1B86BDCE8EECA00CE76 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		894C0A289692CF35B29E81CE /* NotificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationTests.swift; sourceTree = "<group>"; };
+		948583E06E3524A6540D29A8 /* ConversationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationTests.swift; sourceTree = "<group>"; };
+		9D59AFBE629F4979F1DB9CD6 /* InvitationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvitationScreen.swift; sourceTree = "<group>"; };
+		B1D396BF49413BE3688313FF /* SignalConversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalConversation.swift; sourceTree = "<group>"; };
+		BA8B37A01AB45E10F2F48D76 /* DeviceFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceFlowTests.swift; sourceTree = "<group>"; };
+		C80D36F17DA60DEA378C0139 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		D1367F02C2B19567E33D82FB /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		D26FA3BFF51D11B9DC3EB266 /* DiagnosticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsTests.swift; sourceTree = "<group>"; };
+		D33C8A71179A5518C3C1A768 /* VaultTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultTests.swift; sourceTree = "<group>"; };
+		DC8893B09CF93213B469DE9C /* SecretChat.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SecretChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DF32EBE027BB2202D42F35F9 /* SignalBinary */ = {isa = PBXFileReference; lastKnownFileType = folder; name = SignalBinary; path = SignalBinary; sourceTree = SOURCE_ROOT; };
+		E3F502F49537905EB4727B97 /* InvitationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvitationUITests.swift; sourceTree = "<group>"; };
+		E7457D83C14ABA5E4EBC909F /* FirstConversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstConversation.swift; sourceTree = "<group>"; };
+		EB18358975C8CBE207DFA162 /* Diagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagnostics.swift; sourceTree = "<group>"; };
+		EC81A0D32FC01C74662785B2 /* FirstConversationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstConversationTests.swift; sourceTree = "<group>"; };
+		EFCE5DA2655E4CB06F005B29 /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
+		F08A8E0B94492A6176937F8A /* ServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		85142E1CF61BD7D967056238 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56BF210601832DDCC5B5BCCD /* LibSignalClient in Frameworks */,
+				6B417EA76B5DA2234D448C7E /* SignalBinary in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		904BFEB523C4C6A29D31A6FA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A4B97FFC020FA0CE8EAC661 /* LibSignalClient in Frameworks */,
+				1CAD37801DF3C3C1926DBB51 /* SignalBinary in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		200E663D2DABDA718A3A1282 /* Artwork */ = {
+			isa = PBXGroup;
+			children = (
+				6EA531D99D7AD14C55FBECF3 /* InvitationLetter.png */,
+			);
+			path = Artwork;
+			sourceTree = "<group>";
+		};
+		420FA8AA397E8A82D5FC71F7 /* Notification */ = {
+			isa = PBXGroup;
+			children = (
+				37AC3658AE6BD3C7E99CCBFF /* Info.plist */,
+				5A732BEC89A448EDF93347E6 /* Notification.entitlements */,
+				D1367F02C2B19567E33D82FB /* NotificationService.swift */,
+			);
+			path = Notification;
+			sourceTree = "<group>";
+		};
+		4A37FE1DB212AD4DA50A4DA4 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				948583E06E3524A6540D29A8 /* ConversationTests.swift */,
+				BA8B37A01AB45E10F2F48D76 /* DeviceFlowTests.swift */,
+				D26FA3BFF51D11B9DC3EB266 /* DiagnosticsTests.swift */,
+				EC81A0D32FC01C74662785B2 /* FirstConversationTests.swift */,
+				2BDE328107560AA769340AB1 /* HTTPReply.swift */,
+				31BA7FC4A6CF19D2A85DED40 /* MailboxTests.swift */,
+				894C0A289692CF35B29E81CE /* NotificationTests.swift */,
+				F08A8E0B94492A6176937F8A /* ServiceTests.swift */,
+				6B73517BEE43A4397B804820 /* SyncTests.swift */,
+				D33C8A71179A5518C3C1A768 /* VaultTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		702BB9706902FF35C4428A69 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				1E61BF1F4CC24BD0B2AF3F6D /* App.entitlements */,
+				79ADD1B86BDCE8EECA00CE76 /* Assets.xcassets */,
+				37E07B70D0895D0DC093CA2A /* ContactsScreen.swift */,
+				5298AB6C44E426579231E198 /* ConversationScreen.swift */,
+				6A20554C7115CD8D219ED921 /* DeviceModel.swift */,
+				E7457D83C14ABA5E4EBC909F /* FirstConversation.swift */,
+				C80D36F17DA60DEA378C0139 /* Info.plist */,
+				9D59AFBE629F4979F1DB9CD6 /* InvitationScreen.swift */,
+				6DA5719C3A7BA30F24E6937A /* SecretChatApp.swift */,
+				200E663D2DABDA718A3A1282 /* Artwork */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		761525BB269DF85319AB7F46 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				DF32EBE027BB2202D42F35F9 /* SignalBinary */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		85090AEED57413940D456237 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3EF918291F874C0D499117E8 /* NotificationService.appex */,
+				DC8893B09CF93213B469DE9C /* SecretChat.app */,
+				00DCAEFF4067EC5B760B5246 /* SecretChatTests.xctest */,
+				19EFBFB6DAB73423E0C26918 /* SecretChatUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B0A097EECC87C1B140FBF5BA = {
+			isa = PBXGroup;
+			children = (
+				702BB9706902FF35C4428A69 /* App */,
+				420FA8AA397E8A82D5FC71F7 /* Notification */,
+				761525BB269DF85319AB7F46 /* Packages */,
+				F67B0A91FCEC14DDD7392733 /* Shared */,
+				4A37FE1DB212AD4DA50A4DA4 /* Tests */,
+				E81E69553C6C157B551C005D /* UITests */,
+				85090AEED57413940D456237 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E81E69553C6C157B551C005D /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				E3F502F49537905EB4727B97 /* InvitationUITests.swift */,
+			);
+			path = UITests;
+			sourceTree = "<group>";
+		};
+		F67B0A91FCEC14DDD7392733 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				EB18358975C8CBE207DFA162 /* Diagnostics.swift */,
+				47594C0514339E7FA1A5EDBA /* MailboxSync.swift */,
+				48167FD573C190377000A533 /* NotificationPreview.swift */,
+				EFCE5DA2655E4CB06F005B29 /* Profile.swift */,
+				5A9A66DA1542E91D3A3404A4 /* Service.swift */,
+				B1D396BF49413BE3688313FF /* SignalConversation.swift */,
+				4563C9249BACED8AD5D95C0B /* Vault.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		419310C58A612A3CA4DD9926 /* SecretChatTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EB52594FC3F889584DAB144F /* Build configuration list for PBXNativeTarget "SecretChatTests" */;
+			buildPhases = (
+				34EDDB26DBF92E23B0C92876 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3C8BAA9E1A50BA3B1FC19D16 /* PBXTargetDependency */,
+			);
+			name = SecretChatTests;
+			packageProductDependencies = (
+			);
+			productName = SecretChatTests;
+			productReference = 00DCAEFF4067EC5B760B5246 /* SecretChatTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		7E351910B39496360D25EF2E /* SecretChat */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7F4301971004FA7954284BAC /* Build configuration list for PBXNativeTarget "SecretChat" */;
+			buildPhases = (
+				6238A1031B117DF1D4D639E9 /* Sources */,
+				487A9C3C262CDDD37542ADB2 /* Resources */,
+				904BFEB523C4C6A29D31A6FA /* Frameworks */,
+				980F97E149A2024CA825ABDE /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C3FAAC6D013DD3C411B6F021 /* PBXTargetDependency */,
+			);
+			name = SecretChat;
+			packageProductDependencies = (
+				1C7AD7524524A0AD02344397 /* LibSignalClient */,
+				4CD974C6690936867A0E5F0C /* SignalBinary */,
+			);
+			productName = SecretChat;
+			productReference = DC8893B09CF93213B469DE9C /* SecretChat.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E63DB420868A9187A123A6A3 /* SecretChatUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D0AD4DE30AB6F32872705DBD /* Build configuration list for PBXNativeTarget "SecretChatUITests" */;
+			buildPhases = (
+				5CB8A01F77FBF7A5E7980F76 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1AFC782D6CFA07F33703BF61 /* PBXTargetDependency */,
+			);
+			name = SecretChatUITests;
+			packageProductDependencies = (
+			);
+			productName = SecretChatUITests;
+			productReference = 19EFBFB6DAB73423E0C26918 /* SecretChatUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		FDCC0CDD6D124CF7A61BB56C /* NotificationService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0BE0519F99C45B16C35BDFF1 /* Build configuration list for PBXNativeTarget "NotificationService" */;
+			buildPhases = (
+				93F97394E487824687A4B206 /* Sources */,
+				85142E1CF61BD7D967056238 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NotificationService;
+			packageProductDependencies = (
+				7CB284A38B882D097324032E /* LibSignalClient */,
+				6EA30ACCE23B5C88B800C19D /* SignalBinary */,
+			);
+			productName = NotificationService;
+			productReference = 3EF918291F874C0D499117E8 /* NotificationService.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A25F4666375DA48C9F749E84 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					419310C58A612A3CA4DD9926 = {
+						ProvisioningStyle = Automatic;
+					};
+					7E351910B39496360D25EF2E = {
+						ProvisioningStyle = Automatic;
+					};
+					E63DB420868A9187A123A6A3 = {
+						ProvisioningStyle = Automatic;
+						TestTargetID = 7E351910B39496360D25EF2E;
+					};
+					FDCC0CDD6D124CF7A61BB56C = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 1BC85CD28836F13369C5652F /* Build configuration list for PBXProject "SecretChat" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = B0A097EECC87C1B140FBF5BA;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1C18FACAFB3BF61970154C77 /* XCRemoteSwiftPackageReference "libsignal" */,
+				605463B70C02929966BEB5CD /* XCLocalSwiftPackageReference "SignalBinary" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 85090AEED57413940D456237 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7E351910B39496360D25EF2E /* SecretChat */,
+				FDCC0CDD6D124CF7A61BB56C /* NotificationService */,
+				419310C58A612A3CA4DD9926 /* SecretChatTests */,
+				E63DB420868A9187A123A6A3 /* SecretChatUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		487A9C3C262CDDD37542ADB2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DD298FCF6B85FD23FA39FD09 /* Assets.xcassets in Resources */,
+				2BF48EFD854BFEBA8BA9A068 /* InvitationLetter.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		34EDDB26DBF92E23B0C92876 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D19EAD50BFCB3D8CE334867 /* ConversationTests.swift in Sources */,
+				D1B6B627EBD72BF737B78963 /* DeviceFlowTests.swift in Sources */,
+				BC0BF8910078AC904E4122BA /* DiagnosticsTests.swift in Sources */,
+				BD971ABC2883F2DB2EB28942 /* FirstConversationTests.swift in Sources */,
+				6E10DB0F00D8F103A04C6209 /* HTTPReply.swift in Sources */,
+				E2BDBB10170C5AD4419EA2F0 /* MailboxTests.swift in Sources */,
+				A4664EA7ABA08C08F2F5FCDD /* NotificationTests.swift in Sources */,
+				F9F20C8FC6A3813927C33AED /* ServiceTests.swift in Sources */,
+				58E30AE8851C29B14AB3D695 /* SyncTests.swift in Sources */,
+				6A4C64EFB4352544D67CDFAD /* VaultTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5CB8A01F77FBF7A5E7980F76 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B5759980FEEE2167E82710E7 /* InvitationUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6238A1031B117DF1D4D639E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4FDE47DF85D02D68D03B87C /* ContactsScreen.swift in Sources */,
+				61EDC3ABEA61ABD59C237D5E /* ConversationScreen.swift in Sources */,
+				EDD45871AADE06F3DA1A1CBB /* DeviceModel.swift in Sources */,
+				2DD4CDFC69326D15D1DAFA16 /* Diagnostics.swift in Sources */,
+				7F109BA5A19662FA6B98B890 /* FirstConversation.swift in Sources */,
+				BE40A90E5A29851505F52B8C /* InvitationScreen.swift in Sources */,
+				2E74567D1AC8E9D814944EC0 /* MailboxSync.swift in Sources */,
+				980BCD1F30C99475120D96AF /* NotificationPreview.swift in Sources */,
+				7570E86AF5482544688890EA /* Profile.swift in Sources */,
+				A4D0D30C928E95D304200C2F /* SecretChatApp.swift in Sources */,
+				7DA314C6C7F83C6B1F17E851 /* Service.swift in Sources */,
+				6D196F2CE1986526C966ADF9 /* SignalConversation.swift in Sources */,
+				09B7114E62475A1A342C1A09 /* Vault.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		93F97394E487824687A4B206 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B9ABE5F306CDFBD2B28A1E92 /* Diagnostics.swift in Sources */,
+				1D12338FCB07F3273B338B97 /* MailboxSync.swift in Sources */,
+				FF278FEFFF7F16476B7A08E3 /* NotificationPreview.swift in Sources */,
+				ACF21B83F364FE3AF2FD4F40 /* NotificationService.swift in Sources */,
+				9DE3560B479E4AA2EB01820F /* Profile.swift in Sources */,
+				FFEAA60FAB60849B0914EE49 /* Service.swift in Sources */,
+				EC9EFEB914C6587B169A60CF /* SignalConversation.swift in Sources */,
+				211268C0F5C96153E6268082 /* Vault.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1AFC782D6CFA07F33703BF61 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7E351910B39496360D25EF2E /* SecretChat */;
+			targetProxy = C7A787D39784F05ECCFC20BB /* PBXContainerItemProxy */;
+		};
+		3C8BAA9E1A50BA3B1FC19D16 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7E351910B39496360D25EF2E /* SecretChat */;
+			targetProxy = 559E22F732CF5514732001A5 /* PBXContainerItemProxy */;
+		};
+		C3FAAC6D013DD3C411B6F021 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FDCC0CDD6D124CF7A61BB56C /* NotificationService */;
+			targetProxy = 9A295A53488960FA40D2F563 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		04DD0D8001947D3ACCE91529 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = App/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SecretChat;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = chat.secretchat.prototype;
+				SDKROOT = iphoneos;
+				SECRETCHAT_REGISTRATION_UNVERIFIED = YES;
+				SECRETCHAT_SERVICE_URL = "https://101.132.60.65/secretchat";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		29346CC7AA3076C4F0282B44 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 7;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SECRETCHAT_APP_GROUP = group.chat.secretchat.prototype;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		3CB4E14C66447015BE7F0C90 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "chat.secretchat.prototype.ui-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = SecretChat;
+			};
+			name = Release;
+		};
+		5069518700FF0093E685187C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = App/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SecretChat;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = chat.secretchat.prototype;
+				SDKROOT = iphoneos;
+				SECRETCHAT_REGISTRATION_UNVERIFIED = NO;
+				SECRETCHAT_SERVICE_URL = "";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		5406743498A877E7F57DCAB7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 7;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SECRETCHAT_APP_GROUP = group.chat.secretchat.prototype;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		669419F85A29428C7F3E8509 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = Notification/Notification.entitlements;
+				INFOPLIST_FILE = Notification/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = chat.secretchat.prototype.NotificationService;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		6C6C843F3F154B69C014AFEC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = chat.secretchat.prototype.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SecretChat.app/SecretChat";
+			};
+			name = Release;
+		};
+		99B25F43A92939EAF973C9FC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = Notification/Notification.entitlements;
+				INFOPLIST_FILE = Notification/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = chat.secretchat.prototype.NotificationService;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		9BC6E86726268399F13764F2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "chat.secretchat.prototype.ui-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = SecretChat;
+			};
+			name = Debug;
+		};
+		B693A378CC17656BA0A52610 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = chat.secretchat.prototype.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SecretChat.app/SecretChat";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0BE0519F99C45B16C35BDFF1 /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				99B25F43A92939EAF973C9FC /* Debug */,
+				669419F85A29428C7F3E8509 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		1BC85CD28836F13369C5652F /* Build configuration list for PBXProject "SecretChat" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5406743498A877E7F57DCAB7 /* Debug */,
+				29346CC7AA3076C4F0282B44 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7F4301971004FA7954284BAC /* Build configuration list for PBXNativeTarget "SecretChat" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04DD0D8001947D3ACCE91529 /* Debug */,
+				5069518700FF0093E685187C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D0AD4DE30AB6F32872705DBD /* Build configuration list for PBXNativeTarget "SecretChatUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9BC6E86726268399F13764F2 /* Debug */,
+				3CB4E14C66447015BE7F0C90 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EB52594FC3F889584DAB144F /* Build configuration list for PBXNativeTarget "SecretChatTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B693A378CC17656BA0A52610 /* Debug */,
+				6C6C843F3F154B69C014AFEC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		605463B70C02929966BEB5CD /* XCLocalSwiftPackageReference "SignalBinary" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = SignalBinary;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1C18FACAFB3BF61970154C77 /* XCRemoteSwiftPackageReference "libsignal" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/signalapp/libsignal";
+			requirement = {
+				kind = exactVersion;
+				version = 0.108.6;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1C7AD7524524A0AD02344397 /* LibSignalClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1C18FACAFB3BF61970154C77 /* XCRemoteSwiftPackageReference "libsignal" */;
+			productName = LibSignalClient;
+		};
+		4CD974C6690936867A0E5F0C /* SignalBinary */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SignalBinary;
+		};
+		6EA30ACCE23B5C88B800C19D /* SignalBinary */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SignalBinary;
+		};
+		7CB284A38B882D097324032E /* LibSignalClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1C18FACAFB3BF61970154C77 /* XCRemoteSwiftPackageReference "libsignal" */;
+			productName = LibSignalClient;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A25F4666375DA48C9F749E84 /* Project object */;
+}

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>SecretChat · 首次对话设计评审</title>
+<style>
+* {
+  box-sizing: border-box;
+}
+html {
+  color-scheme: light;
+  background: #fcfbf8;
+  color: #252722;
+}
+body {
+  margin: 0;
+  font:
+    16px/1.65 -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
+    sans-serif;
+}
+main {
+  max-width: 1490px;
+  margin: auto;
+  padding: 0 clamp(18px, 5vw, 82px) 56px;
+}
+header {
+  min-height: 70px;
+  border-bottom: 1px solid #c7c8be;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+header b {
+  font: 700 25px/1.15 Georgia, serif;
+  letter-spacing: -1.3px;
+}
+header span {
+  color: #56594f;
+  font-size: 14px;
+}
+h1 {
+  font:
+    600 clamp(37px, 5vw, 72px)/1.2 "Songti SC",
+    STSong,
+    serif;
+  margin: 46px 0 12px;
+  letter-spacing: -.045em;
+}
+h2 {
+  font:
+    600 clamp(25px, 2.7vw, 39px)/1.25 "Songti SC",
+    STSong,
+    serif;
+  margin: 0 0 20px;
+}
+h3 {
+  font-size: 21px;
+  line-height: 1.35;
+  margin: 13px 0 6px;
+}
+p {
+  margin: 0 0 14px;
+}
+.intro {
+  font-size: 18px;
+  color: #4b4d43;
+  max-width: 54em;
+}
+.block {
+  margin-top: 50px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2.4vw, 38px);
+}
+a {
+  color: #244b45;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+a:focus-visible {
+  outline: 3px solid #165746;
+  outline-offset: 3px;
+}
+.issue > a:first-child,
+.dir > a.cover {
+  display: block;
+  border: 1px solid #cecec5;
+  background: #eeede7;
+  overflow: hidden;
+}
+.issue img,
+.cover img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.issue p,
+.dir p {
+  color: #505249;
+  font-size: 15px;
+}
+.dir {
+  border-top: 2px solid var(--accent);
+  padding-top: 12px;
+}
+.dir strong {
+  color: var(--accent);
+  padding-right: 7px;
+}
+.actions {
+  display: flex;
+  gap: 8px 22px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.open {
+  display: inline-block;
+  color: white;
+  background: var(--accent);
+  padding: 7px 15px;
+  border-radius: 4px;
+  text-decoration: none;
+}
+.note {
+  padding: 16px 0;
+  border-top: 1px solid #cecec5;
+  margin-top: 32px;
+  color: #505249;
+}
+.source {
+  margin-top: 18px;
+  color: #63655b;
+  font-size: 14px;
+}
+.links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+footer {
+  margin-top: 32px;
+  padding-top: 10px;
+  border-top: 1px solid #c7c8be;
+}
+@media (max-width: 850px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .block {
+    margin-top: 34px;
+  }
+  h1 {
+    margin-top: 29px;
+  }
+  .issue,
+  .dir {
+    max-width: 660px;
+  }
+  .source {
+    line-height: 1.65;
+  }
+  .intro {
+    font-size: 16px;
+  }
+}
+</style></head><body><main>
+<header><b>SecretChat</b><span>iOS 客户端 · 设计评审</span></header>
+<h1>从一张邀请，到第一段对话</h1><p class="intro">先看现有客户端里三个容易卡住的地方，再用同一段约见对话试用三个设计方向。</p>
+<p><a href="native-a/overview.jpg">查看已选方向 A 的 SwiftUI 模拟器截图</a></p>
+<section class="block"><h2>现有界面的三个问题</h2><div class="grid">
+<article class="issue"><a href="evidence/native-registration.png"><img src="evidence/detail-registration.png" alt="注册页的开发服务与免验证码开关排在填写邮箱和邀请码之前"></a><h3>受邀者先碰到开发配置</h3><p>页面先问 HTTPS 服务根地址和免验证码开关。手里已经有邀请码的人，要先弄清服务地址，才能获取邮箱验证码。</p><a href="evidence/native-registration.png">查看注册原图</a></article>
+<article class="issue"><a href="evidence/native-empty.png"><img src="evidence/detail-empty.png" alt="联系人空态要求注册另一台设备，并列出生成单次邀请码与通知设置"></a><h3>联系人为空时，谁该做什么不清楚</h3><p>「注册另一台设备后，下拉刷新联系人」容易让受邀者以为自己还需要第二台设备。受邀者应刷新找邀请人，首账号应生成并分享单次邀请码。</p><a href="evidence/native-empty.png">查看联系人原图</a></article>
+<article class="issue"><a href="evidence/native-paused.png"><img src="evidence/detail-chat.png" alt="普通与暂停两种聊天状态并排对照，消息标签保留，输入框被一行暂停提示替代"></a><h3>待发消息遇到身份变化，原因消失了</h3><p>普通会话已有「待提交」和设备收件标签。身份变化后，输入框换成「联系受限，发送已暂停。」，却没有说明哪项身份记录变了，或那条待发消息还能否重试。</p><div class="links"><a href="evidence/native-chat.png">普通聊天原图</a><a href="evidence/native-paused.png">身份变化原图</a></div></article>
+</div><p class="source">原图来自 iPhone 模拟器中的现有 SwiftUI 页面，使用合成账号、联系人和消息。上方取景放大了与问题相关的部分。</p></section>
+<section class="block"><h2>用同一段对话试三个方向</h2><p>可以从注册一步步走，也可以跳到某个状态。比较「好，我会提前五分钟到。」从本地排队到对方设备确认的变化，再试一次身份变化。</p><div class="grid">
+<article class="dir" style="--accent:#214caa"><a class="cover" href="dir-1.html"><img src="screenshots/dir-1.png" alt="一张邀请，左边是蓝色信封，右边是同一段约见对话"></a><h3><strong>A</strong>一张邀请</h3><p>点「展开邀请」，用邮箱和短码加入。两台可操作的手机把邀请和第一句话放在一起。</p><div class="actions"><a class="open" href="dir-1.html">打开原型 A</a><a href="screenshots/dir-1.png">查看大图</a></div></article>
+<article class="dir" style="--accent:#24533e"><a class="cover" href="dir-2.html"><img src="screenshots/dir-2.png" alt="消息回执，深绿色聊天页旁的详情单展开本机、服务端与对方设备三种证据"></a><h3><strong>B</strong>消息回执</h3><p>点末条气泡下的回执，再切换「离线待提交」和「设备已确认」，看每一步由谁确认。</p><div class="actions"><a class="open" href="dir-2.html">打开原型 B</a><a href="screenshots/dir-2.png">查看大图</a></div></article>
+<article class="dir" style="--accent:#882c3b"><a class="cover" href="dir-3.html"><img src="screenshots/dir-3.png" alt="往来手记，用发言人、旁注和朱红提示呈现身份变化后的对话"></a><h3><strong>C</strong>往来手记</h3><p>点「查看身份说明」，了解设备标识或身份公钥为何与本机绑定不一致。会话按发言人排列，回执跟随每句话。</p><div class="actions"><a class="open" href="dir-3.html">打开原型 C</a><a href="screenshots/dir-3.png">查看大图</a></div></article>
+</div></section>
+<p class="note">三个原型均使用本地测试数据，可直接打开 HTML。普通注册预设服务根地址；开发联调保留修改地址和免验证码选项。对方设备确认仅表示收件，客户端无法判断是否阅读。</p>
+<footer><div class="links"><a href="product-facts.md">共同场景与客户端依据</a><a href="directions.md">设计来源与备选方向</a><a href="polish-log.md">交互验证记录</a></div></footer></main></body></html>
