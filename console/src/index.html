@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>运营控制台 · SecretChat</title>
+  <link rel="stylesheet" href="console.css">
+  <script type="module" src="dashboard.js"></script>
+  <script type="module" src="operations.js"></script>
+</head>
+<body>
+  <header class="masthead"><span class="brand"><i class="mark" aria-hidden="true"></i>SecretChat</span><span class="section-name">运营控制台</span><span id="operator"></span><button id="logout" class="quiet">退出登录</button></header>
+  <main class="dashboard">
+    <nav id="views" aria-label="运营功能">
+      <button data-view="overview" aria-pressed="true">运行概览</button>
+      <button data-view="reports" aria-pressed="false" hidden>举报工单</button>
+      <button data-view="invites" aria-pressed="false" hidden>邀请管理</button>
+      <button data-view="audit" aria-pressed="false" hidden>操作记录</button>
+    </nav>
+    <p class="error" role="alert" hidden></p>
+    <p class="error" id="ops-error" role="status" hidden></p>
+    <section id="overview">
+      <div class="heading-row"><h1>队列概览</h1><button class="secondary" id="refresh">刷新</button></div>
+      <dl class="metrics" aria-live="polite">
+        <div><dt>待投递信封</dt><dd id="pending">—</dd></div>
+        <div><dt>最早信封等待时间</dt><dd id="wait">—</dd></div>
+      </dl>
+      <p class="status" id="status" role="status"></p>
+      <h2>邮件与推送</h2>
+      <div class="card">
+        <table><thead><tr><th>通道</th><th>配置状态</th><th>近 24 小时失败次数</th></tr></thead>
+          <tbody><tr><th>验证邮件</th><td id="email-status">—</td><td id="email-failures">—</td></tr>
+            <tr><th>APNs 推送</th><td id="push-status">—</td><td id="push-failures">—</td></tr></tbody></table>
+        <p class="footnote" id="registration-mode"></p>
+      </div>
+    </section>
+    <section id="reports" hidden>
+      <div class="heading-row"><h1>举报工单</h1><button id="reports-refresh" class="secondary">更新列表</button></div>
+      <div class="card"><table><thead><tr><th>工单号</th><th>提交时间</th><th>状态</th></tr></thead><tbody id="report-rows"></tbody></table>
+        <p id="reports-empty" class="footnote" hidden>暂无举报工单。</p>
+        <button id="reports-next" class="secondary more" hidden>下一页工单</button>
+      </div>
+      <section id="ticket" class="card details" hidden aria-labelledby="ticket-title">
+        <h2 id="ticket-title">审核材料</h2>
+        <dl class="details-list"><dt>工单号</dt><dd id="ticket-id"></dd><dt>举报账号</dt><dd id="reporter"></dd><dt>被举报账号</dt><dd id="reported"></dd><dt>密钥指纹</dt><dd id="key-id"></dd></dl>
+        <p>材料由举报人自行选择并提交，来源未经证实。选择对应指纹的私钥后可在本机查看。</p>
+        <label for="private-key">本机审核私钥（PKCS#8 PEM）</label>
+        <input id="private-key" type="file" accept=".pem,.key">
+        <div class="actions"><button id="decrypt" class="primary">在本机解密</button><button id="close-ticket" class="secondary">结案</button></div>
+        <p id="review-feedback" role="status"></p>
+        <pre id="material"></pre>
+      </section>
+    </section>
+    <section id="invites" hidden>
+      <div class="heading-row"><h1>邀请管理</h1></div>
+      <div class="card details"><form id="quota-form">
+        <label for="quota">每个账号可持有的邀请码数量</label><input id="quota" type="number" min="0" max="100" required>
+        <button class="primary">保存名额</button></form><p id="invite-feedback" role="status"></p></div>
+      <div class="card details"><h2>首个邀请码</h2><p id="bootstrap-help">首个账号注册后，后续用户由已注册联系人邀请。重新生成会使上次未兑换的首个邀请码失效。</p>
+        <button id="bootstrap" class="secondary">生成首个邀请码</button><output id="bootstrap-code"></output></div>
+    </section>
+    <section id="audit" hidden>
+      <div class="heading-row"><h1>操作记录</h1><button id="audit-refresh" class="secondary">更新记录</button></div>
+      <div class="card"><table><thead><tr><th>时间</th><th>操作员</th><th>动作</th><th>关联记录</th></tr></thead><tbody id="audit-rows"></tbody></table>
+        <button id="audit-next" class="secondary more" hidden>下一页记录</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
