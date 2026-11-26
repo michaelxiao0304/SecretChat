@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<verification-metadata xmlns="https://schema.gradle.org/dependency-verification">
+    <configuration>
+        <verify-metadata>false</verify-metadata>
+        <verify-signatures>false</verify-signatures>
+        <trusted-artifacts>
+            <trust group="^(?!org[.]signal$).*" regex="true" reason="Checksum pins in this project cover the Signal protocol binaries."/>
+        </trusted-artifacts>
+    </configuration>
+    <components>
+        <component group="org.signal" name="libsignal-android" version="0.108.6">
+            <artifact name="libsignal-android-0.108.6.aar">
+                <sha256 value="4ae77165c590008835772d794a6998330bb1d955e559cc4abfb6d968d5acc359"/>
+            </artifact>
+        </component>
+        <component group="org.signal" name="libsignal-client" version="0.108.6">
+            <artifact name="libsignal-client-0.108.6.jar">
+                <sha256 value="b480f3866b9fb4d374de5c50752568f120e09fa9cec1893d5bc8e79c77453ddd"/>
+            </artifact>
+            <artifact name="libsignal-client-0.108.6-sources.jar">
+                <sha256 value="a8b02787b756a4083dd722e6096e021bbbe65981ef4642bdf99e3e30a43b5f54"/>
+            </artifact>
+        </component>
+    </components>
+</verification-metadata>

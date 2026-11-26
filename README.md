@@ -34,7 +34,7 @@ iMessage 是首批 iPhone 用户已有的私聊选择。企业微信、钉钉、
 
 iOS 的普通截屏通知在截图完成后到达。客户端可事后提醒；录屏、镜像期间可根据场景捕获状态隐藏后续画面，切到后台时遮蔽 App 切换器快照。敏感气泡可禁用应用内复制，锁屏通知默认隐藏正文。对方仍可以用其他设备拍照，保存已经看到或复制的内容。[Apple 截屏通知](https://developer.apple.com/documentation/uikit/uiapplication/userdidtakescreenshotnotification) · [Apple 屏幕共享防护](https://developer.apple.com/documentation/swiftui/protecting-sensitive-content-when-screen-sharing)
 
-后续 Android 版在敏感窗口使用 `FLAG_SECURE` 限制系统截屏和向非安全显示器输出。识别截屏事件需单独使用支持该能力的系统回调，并向用户说明可检测的范围。[Android 截屏控制与检测](https://developer.android.com/about/versions/14/features/screenshot-detection)
+[Android 开发原型](android/README.md)在敏感窗口使用 `FLAG_SECURE` 限制系统截屏和向非安全显示器输出。识别截屏事件需单独使用支持该能力的系统回调，并向用户说明可检测的范围。[Android 截屏控制与检测](https://developer.android.com/about/versions/14/features/screenshot-detection)
 
 ## 4. 首发地区与合规核实
 
@@ -68,7 +68,7 @@ flowchart LR
 | `ios/` | SwiftUI + libsignal Swift 绑定，另含通知扩展（Notification Service Extension）。负责联系人核验、会话加解密、加密本地存储、重连与到期清理。 |
 | `service/` | Java 17 + Spring Boot。提供邮箱和邀请码验证、设备公钥目录、密文信箱、收件确认、APNs 通知及独立鉴权的管理 API。不链接 libsignal，公钥材料按不透明字节存取，见 §8。 |
 | `console/` | Web 运营控制台。查看队列深度、最老信封等待时间、邮件与推送失败情况，处理用户主动提交的举报，并记录管理员操作。 |
-| `android/` | 后续 Kotlin 客户端。与 iOS 共用应用层信封格式、撤回语义和互操作用例。群组另行评估基于 RFC 9420 的 OpenMLS。[MLS 规范](https://www.rfc-editor.org/rfc/rfc9420.html) |
+| `android/` | [Kotlin 客户端及构建说明](android/README.md)。当前与 iOS 原型共用邀请、文字信封和投递回执，已有双向协议互操作验证。后续阶段统一撤回语义。群组另行评估基于 RFC 9420 的 OpenMLS。[MLS 规范](https://www.rfc-editor.org/rfc/rfc9420.html) |
 
 客户端只做 iOS 和 Android，不考虑 PC 端。
 
